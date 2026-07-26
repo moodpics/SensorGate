@@ -21,63 +21,61 @@
   a{ color: #f3aa3d; }
   .wrap{ max-width: 1220px; margin: 0 auto; padding: 56px 28px 80px; }
 
-  header.hero{ border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 6px; position: relative; overflow: hidden; }
-  .ghost-fx{ pointer-events: none; animation: ghost-evaporate 5s ease-out forwards; }
-  .ghost-fx .ghost-float-inner{ display:inline-block; animation: ghost-float 7s ease-in-out 5s infinite; }
-  /* Uniquement un mouvement vertical (jamais horizontal) : le mot reste ancré à gauche et ne
-     risque jamais de sortir du cadre, quelle que soit la largeur d'écran ("format"). */
-  @keyframes ghost-evaporate{
-    0%{ opacity: 0.85; filter: blur(0px); transform: translate(0, 0); }
-    100%{ opacity: 0.5; filter: blur(2.5px); transform: translate(0, -20px); }
-  }
+  header.hero{ border-bottom: 1px solid var(--line); padding-bottom: 32px; margin-bottom: 40px; }
   @keyframes ghost-float{
     0%, 100%{ transform: translate(0, 0); }
     50%{ transform: translate(0, -10px); }
   }
-  /* Loge sous "image areas", à peine à cheval sur son bord bas (juste un frôlement, pas un
-     recouvrement) — puis dérive à peine, presque imperceptiblement, vers "dimensions / ratios"
-     et revient. Jamais tronqué : ni largeur maximale, ni overflow, sur cet élément. */
-  @keyframes ghost-drift{
-    0%, 100%{ transform: translate(0, 0); }
-    50%{ transform: translate(9px, -2px); }
-  }
-  h1{ position: relative; z-index: 1; margin: 0 0 60px; }
-  .ghost-strip{
-    position: absolute; top: 132px; left: 20px; z-index: 0;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.01em;
-    font-size: clamp(34px, 5.8vw, 60px); color: var(--paper); white-space: nowrap;
-  }
-  .ghost-strip .ghost-drift-inner{ display:inline-block; animation: ghost-drift 20s ease-in-out infinite; }
-  h1 .title-line1{ display:inline-block; font-size: clamp(26px, 4.2vw, 44px); }
-  h1 .title-big{ display:inline-block; font-size: clamp(40px, 6.4vw, 68px); }
-  h1 .amp-yellow{ color: #f4d35e; }
-  /* Typo normale, sans effet ni flottement — simple continuation du titre en plus petit et plus discret. */
-  h1 .title-plain{
-    display:inline-block; vertical-align: middle; margin-left: 10px;
-    font-weight: 400; letter-spacing: normal; font-size: clamp(15px, 1.8vw, 20px);
-    color: var(--paper-dim); white-space: normal;
-  }
   /* Variante compacte de la même typo/effet flottant, réutilisée dans la barre d'outils
-     (placeholder de sélection et formats épinglés) plutôt que dans l'en-tête. */
+     (placeholder de sélection et formats épinglés). */
   .ghost-chip{
     font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.01em;
     font-size: 15px; color: var(--paper); background: none; border: none; padding: 6px 2px;
     cursor: pointer; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
   }
-  .ghost-chip .ghost-float-inner{ animation-duration: 6s; animation-delay: 0s; }
+  .ghost-float-inner{ display:inline-block; animation: ghost-float 6s ease-in-out infinite; }
   .ghost-chip:hover{ color: #f3aa3d; }
   .ghost-chip.select-placeholder{ color: var(--paper-dim); }
+  /* Puce d'un format sélectionné : nom (toggle + fiche) et croix (retrait direct) séparés. */
+  .ghost-chip.active{ display: inline-flex; align-items: baseline; gap: 5px; overflow: visible; }
+  .ghost-chip-name{ cursor: pointer; }
+  .ghost-chip-name:hover{ text-decoration: underline; }
+  .ghost-chip-remove{
+    font-family: 'JetBrains Mono', monospace; font-size: 15px; line-height: 1; font-weight: 600;
+    background: none; border: none; color: var(--paper-dim); opacity: .6; cursor: pointer; padding: 2px 3px;
+    transition: opacity .15s ease, color .15s ease;
+  }
+  .ghost-chip-remove:hover{ opacity: 1; color: #e35a2e; }
   .ghost-chip.select-placeholder .ghost-strong{ color: var(--paper); }
+  .hero-top{ display:flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
   .eyebrow{
     font-family:'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: #f3aa3d; margin-bottom: 14px; display:flex; align-items:center; gap: 10px;
+    text-transform: uppercase; color: #f3aa3d; display:flex; align-items:center; gap: 10px;
   }
   .eyebrow::before{ content:""; width: 22px; height: 1px; background: #e35a2e; display:inline-block; }
-  h1{ font-size: clamp(32px, 5vw, 52px); line-height: 1.05; font-weight: 700; letter-spacing: -0.01em; }
-  h1 .amp{ color: #f3aa3d; }
+  /* Badge graphique, isolé en haut à droite — ce qu'était "des caméras digitales et film". */
+  .cam-badge{
+    font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--paper-dim); border: 1px solid var(--line); border-radius: 3px; background: var(--bg-raised);
+    padding: 7px 12px; white-space: nowrap;
+  }
+  .cam-badge .amp{ color: #f3aa3d; }
+  h1{
+    font-size: clamp(20px, 3.15vw, 36px); line-height: 1.15; font-weight: 700; letter-spacing: -0.01em;
+    margin: 0 0 22px; max-width: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  h1 .amp, h1 .hl{ color: #f3aa3d; }
+  /* Sauf le titre, chaque phrase de l'intro tient sur une ligne. */
   .hero p{
-    max-width: none; color: var(--paper-dim); font-size: 14px; line-height: 1.5; margin: 0;
+    max-width: none; color: var(--paper-dim); font-size: 15px; line-height: 1.6; margin: 14px 0 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hero p:first-of-type{ margin-top: 0; }
+  .hero p.lede{ font-style: italic; }
+  /* Même recette que le fameux "surface sensible" — typo pleine, brumeuse, qui flotte doucement. */
+  .hero p.ghost-line{
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.01em;
+    font-size: clamp(22px, 3.2vw, 34px); color: var(--paper); opacity: 0.55; filter: blur(1.5px);
   }
 
   .section-label{
@@ -104,13 +102,14 @@
   .legend button:hover{ opacity: 1; }
   .legend button.legend-tab-big{ font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; border-style: dashed; }
 
-  .jump-select{
-    font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--paper);
-    background: #2a2419; border: 1px solid #e35a2e; padding: 7px 10px; border-radius: 3px; cursor: pointer;
-    box-shadow: 0 0 0 1px rgba(227,90,46,0.18); transition: box-shadow .15s ease, border-color .15s ease;
-    width: 220px; max-width: 100%; text-overflow: ellipsis;
+  /* Champ combiné : on y tape pour filtrer, ou on clique dedans (vide) pour dérouler tous les formats —
+     une seule et même liste #quick-search-results assure les deux usages. */
+  .combo-input{
+    font-family:'JetBrains Mono', monospace; font-size: 11.5px; color: var(--paper);
+    background: var(--bg-raised); border: 1px solid var(--line); padding: 7px 10px; border-radius: 3px;
+    width: 260px; max-width: 100%; transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .jump-select:hover, .jump-select:focus{ border-color: #f3aa3d; box-shadow: 0 0 0 2px rgba(243,170,61,0.25); outline: none; }
+  .combo-input:hover, .combo-input:focus{ border-color: #f3aa3d; box-shadow: 0 0 0 2px rgba(243,170,61,0.25); outline: none; }
 
   .compare-hint{
     margin-left:auto; font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--paper-dim);
@@ -126,7 +125,21 @@
   .ref-note{ font-family:'JetBrains Mono', monospace; font-size: 10.5px; color: #f4e4b8; margin-bottom: 14px; display:flex; align-items:center; gap: 8px; }
   .ref-note .sw{ width:10px; height:10px; border-radius:2px; background:#f4e4b8; flex-shrink:0; }
 
-  .diagram-area{ display:flex; flex-wrap: wrap; gap: 24px; align-items:flex-start; }
+  .diagram-area{ display:flex; flex-wrap: wrap; gap: 24px; align-items:flex-start; position: relative; }
+  /* Fenêtre d'agrandissement au survol : overlay en haut à droite du diagramme, 1/5 de sa taille,
+     qui apparaît/disparaît avec le survol (jamais interactive elle-même). */
+  .hover-zoom{
+    position: absolute; top: 10px; right: 10px; width: 20%; min-width: 150px; max-width: 260px;
+    aspect-ratio: 4 / 3; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.55); overflow: hidden; opacity: 0; pointer-events: none;
+    transition: opacity .12s ease; z-index: 6;
+  }
+  .hover-zoom.show{ opacity: 1; }
+  .hover-zoom svg{ width: 100%; height: 100%; display: block; }
+  .hz-dim{
+    font-family:'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; fill: #fff;
+    paint-order: stroke; stroke: rgba(0,0,0,0.8); stroke-width: 3px; stroke-linejoin: round;
+  }
   svg.diagram-svg{ display:block; overflow: visible; flex: 1 1 480px; min-width: 280px; max-width: 100%; height: auto; }
   svg.diagram-svg rect.frame{ transition: opacity .2s ease, stroke-width .15s ease, fill-opacity .15s ease; cursor: pointer; pointer-events: all; }
   svg.diagram-svg .dim{ opacity: .06; }
@@ -189,14 +202,7 @@
 
   .diagram-foot{ margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line-soft); font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--paper-dim); }
 
-  #chart-detail{ width: 100%; overflow: hidden; margin-top: 20px; }
-  #chart-detail, #chart-detail *{ pointer-events: none !important; cursor: default !important; }
-  #chart-detail.detail-default .frame-image{ filter: grayscale(1) brightness(0.85); }
-  #chart-detail.detail-zoom rect.frame, #chart-detail.detail-zoom .ghost-outline, #chart-detail.detail-zoom .ref-outline{
-    vector-effect: non-scaling-stroke;
-  }
-  #chart-detail .tick-line-exact{ stroke: var(--paper-dim); stroke-width: 1.4; }
-  #chart-detail .tick-label-exact{ fill: var(--paper); font-weight: 700; font-size: 10.5px; }
+  #hover-zoom-svg rect.frame, #hover-zoom-svg .ghost-outline, #hover-zoom-svg .ref-outline{ vector-effect: non-scaling-stroke; }
 
   .tables{ display:grid; grid-template-columns: 1.35fr 1fr; gap: 20px; margin: 40px 0 8px; }
   @media (max-width: 900px){ .tables{ grid-template-columns: 1fr; } }
@@ -313,10 +319,13 @@
 <div class="wrap">
 
   <header class="hero">
-    <div class="eyebrow">fiche de référence — chef opérateur</div>
-    <h1><span class="title-line1">film <span class="amp">&amp;</span> digital cameras</span><br><span class="title-big">image areas</span><span class="title-plain"> dimensions mm × mm <span class="amp-yellow">&amp;</span> ratios 1.??:1</span></h1>
-    <div class="ghost-strip ghost-fx" aria-hidden="true"><span class="ghost-drift-inner">surface sensible</span></div>
-    <p>Comparatif visuel des surfaces de capture réellement exposées — du 16mm au 65mm IMAX, la photo argentique, et les capteurs digitaux.</p>
+    <div class="hero-top">
+      <div class="eyebrow">fiche de référence — chef opérateur</div>
+      <div class="cam-badge">digital <span class="amp">&amp;</span> film cameras</div>
+    </div>
+    <h1>La <span class="hl">surface d'enregistrement</span> de l'image définit son cadrage</h1>
+    <p class="lede">En effet, la focale donne tout le potentiel d'angle de vue, mais le format d'enregistrement recadre dedans.</p>
+    <p class="ghost-line"><span class="ghost-float-inner">visualise et compare</span></p>
   </header>
 
   <div class="section-label"><b>01 — Diagramme à l'échelle</b><span class="n">· survolez pour prévisualiser, cliquez pour comparer et voir le détail</span></div>
@@ -328,18 +337,16 @@
         <div class="legend" id="legend-bottom"></div>
       </div>
       <div class="compare-hint" style="position:relative">
-        <input type="text" id="quick-search-input" placeholder="Rechercher un format ou une caméra..." style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--bg-raised);border:1px solid var(--line);color:var(--paper);padding:7px 10px;border-radius:3px;width:220px;max-width:100%">
-        <select id="quick-select-format" class="jump-select">
-          <option value="">Aller à un format…</option><option value="16mm">16mm standard</option><option value="s16">S16mm</option><option value="ac35">35mm Academy</option><option value="s35-4p">S35mm, 4-perf</option><option value="s35-3p">S35mm, 3-perf</option><option value="s35-2p">S35mm, 2-perf</option><option value="scope">Cinemascope, anamorphique ×2</option><option value="scope13">S35mm 3-perf, anamorphique ×1,3</option><option value="vv-film">VistaVision, 8-perf</option><option value="65-5p">65mm standard, 5-perf (ARRIFLEX 765)</option><option value="imax">IMAX 65mm, 15-perf</option><option value="photo-135">35mm photo (135)</option><option value="photo-6x6">Moyen format 6×6</option><option value="photo-5x7">Large Format 5×7"</option><option value="d-s35og">S35 numérique, plein capteur</option><option value="d-s35169">S35 numérique, 16:9</option><option value="d-ff">Plein format (135), 36×24</option><option value="d-lf">Large Format (Alexa LF, plein capteur)</option><option value="d-vv">VistaVision numérique (RED VV)</option><option value="d-komodo">RED Komodo 6K / Komodo-X (S35mm)</option><option value="d-gemini">RED Gemini 5K (S35mm)</option><option value="d-helium">RED Helium 8K (S35mm)</option><option value="d-z8">Nikon Z8 / ZR (plein format)</option><option value="d-alexa35">ARRI Alexa 35 (S35mm, plein capteur)</option><option value="d-alexa65">ARRI Alexa 65 (Large Format)</option><option value="d-fx3">Sony FX3 / FX6 / FX5 (plein format E-mount)</option><option value="d-venice">Sony Venice 1 &amp; 2 (plein format)</option></select>
+        <input type="text" id="quick-search-input" class="combo-input" placeholder="Rechercher ou choisir un format..." autocomplete="off">
         <button class="clear-btn" id="clear-selection">tout désélectionner</button>
         <div id="quick-search-results" style="display:none;position:absolute;top:100%;left:0;margin-top:6px;width:320px;max-height:320px;overflow-y:auto;background:var(--bg-raised);border:1px solid var(--line);border-radius:4px;z-index:20;padding:6px"></div>
       </div>
     </div>
     <div class="diagram-area">
       <svg id="chart" class="diagram-svg" width="900" height="440" viewBox="0 0 900 440"></svg>
+      <div class="hover-zoom" id="hover-zoom"><svg id="hover-zoom-svg" viewBox="0 0 320 240"></svg></div>
     </div>
     <div class="inspector" id="inspector"><div class="placeholder">Cliquez sur un nom dans le diagramme pour l'épingler ici, le comparer à d'autres formats, et ouvrir sa fiche détaillée. Le survol seul affiche un aperçu temporaire.</div></div>
-    <svg id="chart-detail" class="diagram-svg" width="900" height="300" viewBox="0 0 900 300"></svg>
     <div class="diagram-foot">Échelle · 1 mm = 7 px — origine commune en bas à gauche. Le FF 35mm photo (135), 36×24 sert de référence commune à la photo argentique et aux capteurs digital Full Frame (Sony Venice, etc.) — visible dans les onglets Pellicule photo et Digital.</div>
   </div>
 
@@ -587,169 +594,88 @@ function unisolate(){
   updateDetail();
 }
 
-// ---------- Diagramme de détail — miroir du principal (sans texte, image grisée) au repos,
-// ou zoom plein cadre sur le format survolé/sélectionné, avec une règle recalculée pour lui. ----------
-const detailChart = document.getElementById('chart-detail');
+// ---------- Fenêtre d'agrandissement au survol — overlay en haut à droite du diagramme, 1/5 de
+// sa taille, qui apparaît/disparaît avec le survol. Anamorphique : cadre large désqueezé. ----------
+const hoverZoomBox = document.getElementById('hover-zoom');
+const hoverZoomSvg = document.getElementById('hover-zoom-svg');
 
 function updateDetail(){
-  const id = hoveredId || (selectedIds.size ? [...selectedIds].pop() : null);
-  const d = id ? DATA.find(x => x.id === id) : null;
-  if(d) renderDetailZoom(d); else renderDetailDefault();
+  const d = hoveredId ? DATA.find(x => x.id === hoveredId) : null;
+  if(!d){ hoverZoomBox.classList.remove('show'); return; }
+  renderHoverZoom(d);
+  hoverZoomBox.classList.add('show');
 }
 
-function renderDetailDefault(){
-  const srcW = parseFloat(chart.getAttribute('width'));
-  const srcH = parseFloat(chart.getAttribute('height'));
-  if(!srcW || !srcH) return;
-  // même ratio que le diagramme principal, pixel pour pixel — aucune bande vide, le panneau
-  // épouse exactement la hauteur réelle du contenu cloné.
-  const W = 900, H = W * (srcH/srcW);
-  detailChart.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  detailChart.setAttribute('width', W);
-  detailChart.setAttribute('height', H);
-  detailChart.classList.remove('detail-zoom');
-  detailChart.classList.add('detail-default');
-  detailChart.innerHTML = '';
-
-  const s = W/srcW; // == H/srcH
-  const g = svgNS('g', { transform: `scale(${s})` });
-
-  [...chart.children].forEach(el => {
-    const tag = el.tagName.toLowerCase();
-    if(tag === 'defs') return;
-    if(el.classList.contains('label-group')) return; // pas de texte de format
-    if(el.classList.contains('leader')) return; // pas de texte de format (désqueeze)
-    if(el.classList.contains('ref-tag')) return; // pas de texte de format
-    g.appendChild(el.cloneNode(true));
-  });
-
-  // les clip-paths des images référencées doivent être reclonés avec des ids propres à ce second SVG
-  const defsSrc = chart.querySelector('defs');
-  if(defsSrc){
-    const defsClone = defsSrc.cloneNode(true);
-    [...defsClone.querySelectorAll('clipPath')].forEach(cp => {
-      const oldId = cp.id, newId = 'detail-' + oldId;
-      cp.id = newId;
-      g.querySelectorAll(`[clip-path="url(#${oldId})"]`).forEach(node => node.setAttribute('clip-path', `url(#${newId})`));
-    });
-    g.insertBefore(defsClone, g.firstChild);
-  }
-
-  detailChart.appendChild(g);
-}
-
-function niceStep(halfRange){
-  if(!isFinite(halfRange) || halfRange <= 0) return 1;
-  const target = 4;
-  const raw = halfRange / target;
-  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
-  const norm = raw / mag;
-  let mult;
-  if(norm <= 1) mult = 1;
-  else if(norm <= 2) mult = 2;
-  else if(norm <= 5) mult = 5;
-  else mult = 10;
-  return mult * mag;
-}
 function fmtMM(n){
   const r = Math.round(n * 100) / 100;
   return Number.isInteger(r) ? String(r) : r.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
 }
-function buildTicks(half, step){
-  const arr = [0];
-  for(let k=step; k<half-1e-6; k+=step) arr.push(k);
-  arr.push(half); // le bord du cadre — toujours étiqueté avec la mesure exacte
-  return arr;
+
+// Le cadre à afficher : pour un anamorphique, le cadre large désqueezé (fenêtre de capture
+// élargie par le facteur de squeeze) — pas la fenêtre brute, comprimée, telle qu'exposée sur la pellicule.
+function hoverFrameBounds(d){
+  const w = d.w * SCALE, h = d.h * SCALE;
+  if(d.squeeze){
+    const dw = w * d.squeeze;
+    return { x: CENTER_X - dw/2, y: CENTER_Y - h/2, w: dw, h, mmW: d.w * d.squeeze, mmH: d.h };
+  }
+  return { x: CENTER_X - w/2, y: CENTER_Y - h/2, w, h, mmW: d.w, mmH: d.h };
 }
 
-// Grossissement du format survolé/sélectionné : on clone l'état actuel du diagramme principal
-// (cadres + image partagée, y compris le survol/dim déjà appliqué), recadré strictement sur la
-// fenêtre de ce format (rien de visible en dehors), avec une règle graduée à ses dimensions exactes.
-function renderDetailZoom(d){
-  const leftM = 46, rightM = 14, topM = 12, bottomM = 34;
-  const innerW = 900 - leftM - rightM;
-  const innerH = innerW * (d.h/d.w);
-  const W = 900, H = innerH + topM + bottomM;
-  detailChart.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  detailChart.setAttribute('width', W);
-  detailChart.setAttribute('height', H);
-  detailChart.classList.remove('detail-default');
-  detailChart.classList.add('detail-zoom');
-  detailChart.innerHTML = '';
+function renderHoverZoom(d){
+  hoverZoomSvg.innerHTML = '';
+  const W = 320, H = 240, margin = 16;
+  hoverZoomSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  const fw = d.w * SCALE, fh = d.h * SCALE;
-  const fx = CENTER_X - fw/2, fy = CENTER_Y - fh/2;
-  const zoom = innerW/fw; // == innerH/fh, le cadre remplit exactement la zone tracée
-  const tx = leftM - fx*zoom, ty = topM - fy*zoom;
+  const { x:fx, y:fy, w:fw, h:fh, mmW, mmH } = hoverFrameBounds(d);
+  const availW = W - margin*2, availH = H - margin*2;
+  const zoom = Math.min(availW/fw, availH/fh);
+  const drawnW = fw*zoom, drawnH = fh*zoom;
+  const offsetX = (W-drawnW)/2, offsetY = (H-drawnH)/2;
+  const tx = offsetX - fx*zoom, ty = offsetY - fy*zoom;
 
-  // la scène (image + cadres clonés) est strictement bornée à la fenêtre du format : rien de
-  // ce qui dépasse — autres cadres, portion d'image hors champ — ne doit être visible.
-  const clipId = 'detail-plot-clip';
+  // scène strictement bornée à la fenêtre du format — rien de visible en dehors.
+  const clipId = 'hz-clip';
   const defs = svgNS('defs', {});
   const clip = svgNS('clipPath', { id: clipId });
-  clip.appendChild(svgNS('rect', { x:leftM, y:topM, width:innerW, height:innerH }));
+  clip.appendChild(svgNS('rect', { x:offsetX, y:offsetY, width:drawnW, height:drawnH }));
   defs.appendChild(clip);
-  detailChart.appendChild(defs);
+  hoverZoomSvg.appendChild(defs);
 
   const scene = svgNS('g', { 'clip-path': `url(#${clipId})` });
   const g = svgNS('g', { transform: `translate(${tx},${ty}) scale(${zoom})` });
   [...chart.children].forEach(el => {
     const tag = el.tagName.toLowerCase();
     if(tag === 'defs') return;
-    if(el.classList.contains('label-group')) return; // pas de texte de format
+    if(el.classList.contains('label-group')) return;
     if(el.classList.contains('leader')) return;
     if(el.classList.contains('ref-tag')) return;
-    if(el.classList.contains('tick-line')) return;
-    if(el.classList.contains('tick-label')) return;
-    if(el.classList.contains('axis-label')) return;
+    if(el.classList.contains('tick-line') || el.classList.contains('tick-label') || el.classList.contains('axis-label')) return;
     g.appendChild(el.cloneNode(true));
   });
-
-  // les clip-paths des images référencées doivent être reclonés avec des ids propres à ce second SVG
   const defsSrc = chart.querySelector('defs');
   if(defsSrc){
     const defsClone = defsSrc.cloneNode(true);
     [...defsClone.querySelectorAll('clipPath')].forEach(cp => {
-      const oldId = cp.id, newId = 'detail-zoom-' + oldId;
+      const oldId = cp.id, newId = 'hz-img-' + oldId;
       cp.id = newId;
       g.querySelectorAll(`[clip-path="url(#${oldId})"]`).forEach(node => node.setAttribute('clip-path', `url(#${newId})`));
     });
     g.insertBefore(defsClone, g.firstChild);
   }
   scene.appendChild(g);
-  detailChart.appendChild(scene);
+  hoverZoomSvg.appendChild(scene);
 
-  // règle graduée adaptée aux dimensions exactes du format affiché — abscisses (largeur)
-  // et ordonnées (hauteur), avec le bord du cadre toujours étiqueté en clair.
-  const pxPerMM = innerW/d.w;
-  const cx = leftM + innerW/2, cy = topM + innerH/2;
-  const halfW = d.w/2, halfH = d.h/2;
-  const ticksW = buildTicks(halfW, niceStep(halfW));
-  const ticksH = buildTicks(halfH, niceStep(halfH));
+  hoverZoomSvg.appendChild(svgNS('rect', { x:offsetX, y:offsetY, width:drawnW, height:drawnH, fill:'none', stroke:d.color, 'stroke-width':2.4 }));
 
-  ticksW.forEach(k => {
-    const isEdge = k === halfW;
-    const xs = k===0 ? [cx] : [cx-k*pxPerMM, cx+k*pxPerMM];
-    xs.forEach(xx => {
-      detailChart.appendChild(svgNS('line', { x1:xx, x2:xx, y1:topM, y2:topM+innerH, class:'tick-line' + (isEdge?' tick-line-exact':'') }));
-      const t = svgNS('text', { x:xx, y:topM+innerH+16, 'text-anchor':'middle', class:'tick-label' + (isEdge?' tick-label-exact':'') });
-      t.textContent = fmtMM(k*2); detailChart.appendChild(t);
-    });
-  });
-  ticksH.forEach(k => {
-    const isEdge = k === halfH;
-    const ys = k===0 ? [cy] : [cy-k*pxPerMM, cy+k*pxPerMM];
-    ys.forEach(yy => {
-      detailChart.appendChild(svgNS('line', { x1:leftM, x2:leftM+innerW, y1:yy, y2:yy, class:'tick-line' + (isEdge?' tick-line-exact':'') }));
-      const t = svgNS('text', { x:leftM-8, y:yy+3, 'text-anchor':'end', class:'tick-label' + (isEdge?' tick-label-exact':'') });
-      t.textContent = fmtMM(k*2); detailChart.appendChild(t);
-    });
-  });
+  // mesures en mm, grandes et lisibles, au milieu de chaque côté.
+  const wLabel = svgNS('text', { x:offsetX+drawnW/2, y:offsetY+drawnH-10, 'text-anchor':'middle', class:'hz-dim' });
+  wLabel.textContent = `${fmtMM(mmW)} mm`;
+  hoverZoomSvg.appendChild(wLabel);
 
-  const axisX = svgNS('text', { x:W-rightM, y:H-6, 'text-anchor':'end', class:'axis-label' });
-  axisX.textContent = 'largeur (mm)'; detailChart.appendChild(axisX);
-  const axisY = svgNS('text', { x:8, y:20, class:'axis-label' });
-  axisY.textContent = 'hauteur (mm)'; detailChart.appendChild(axisY);
+  const hLabel = svgNS('text', { 'text-anchor':'middle', class:'hz-dim', transform:`translate(${offsetX+16},${offsetY+drawnH/2}) rotate(-90)` });
+  hLabel.textContent = `${fmtMM(mmH)} mm`;
+  hoverZoomSvg.appendChild(hLabel);
 }
 
 function openModal(d){
@@ -803,7 +729,7 @@ document.addEventListener('click', (e) => {
   if(!document.getElementById('modal-overlay').classList.contains('open')) return;
   if(e.target.closest('.modal-box')) return;
   if(e.target.closest('[data-id]')) return; // un clic sur le diagramme ouvre/actualise sa propre modale
-  if(e.target.closest('#quick-select-format') || e.target.closest('.search-result')) return;
+  if(e.target.closest('#quick-search-input') || e.target.closest('#quick-search-results')) return;
   closeModal();
 });
 document.addEventListener('keydown', (e) => {
@@ -935,7 +861,7 @@ function render(){
     const d = DATA.find(x => x.id === id);
     const refDims = d.shareWith ? DATA.find(x => x.id === d.shareWith) : d;
     const w = refDims.w * SCALE, h = refDims.h * SCALE;
-    return { d, ax: CENTER_X + w/2, ay: CENTER_Y - h/2 };
+    return { d, ax: CENTER_X - w/2, ay: CENTER_Y - h/2 };
   }).sort((a,b) => a.ay - b.ay);
 
   const MIN_GAP = 14;
@@ -948,12 +874,13 @@ function render(){
   });
 
   // la hauteur du canevas s'adapte au nombre de formats — plus aucune étiquette ne sort du cadre visible.
-  // Plus de marge blanche à droite : le diagramme (et l'image du 5×7) occupe toute la largeur, les noms
-  // de formats et leurs lignes de rappel s'inscrivent par-dessus l'image, dans sa bande droite.
+  // Le diagramme (et l'image du 5×7) occupe toute la largeur ; les noms de formats et leurs lignes de
+  // rappel s'inscrivent par-dessus l'image, dans sa bande gauche.
+  const leftMargin = 20;
   const rightMargin = 20;
   const labelZoneW = 260;
-  const labelX = GRID_END_X - rightMargin;
-  const bendX = GRID_END_X - labelZoneW;
+  const labelX = ORIGIN_X + leftMargin;
+  const bendX = ORIGIN_X + labelZoneW;
   const neededHeight = Math.max(ORIGIN_Y + 40, prevY + 40);
   const neededWidth = GRID_END_X + rightMargin;
   chart.setAttribute('width', neededWidth);
@@ -974,13 +901,13 @@ function render(){
     if(d.isRef) g.dataset.ref = '1';
 
     // si le cadre touche déjà la bande d'étiquettes (grands formats), pas de coude vers l'extérieur
-    const path = it.ax <= bendX
+    const path = it.ax >= bendX
       ? `M ${it.ax} ${it.ay} L ${bendX} ${it.ay} L ${bendX} ${it.ly} L ${labelX} ${it.ly}`
       : `M ${it.ax} ${it.ay} L ${it.ax} ${it.ly} L ${labelX} ${it.ly}`;
     g.appendChild(svgNS('path', { d:path, fill:'none', stroke: d.color, 'stroke-width':1, 'stroke-opacity':0.6 }));
     g.appendChild(svgNS('circle', { cx:it.ax, cy:it.ay, r:2.4, fill: d.color }));
 
-    const label = svgNS('text', { x:labelX, y:it.ly+3, 'text-anchor':'end', class:'fname' });
+    const label = svgNS('text', { x:labelX, y:it.ly+3, 'text-anchor':'start', class:'fname' });
     label.setAttribute('fill', d.color);
     label.textContent = d.name;
     g.appendChild(label);
@@ -1038,14 +965,15 @@ function renderCompareSummary(){
 
 // Ligne 1 (haut) : tant que rien n'est sélectionné, un texte flottant invite à choisir un format —
 // cliquer dessus active l'onglet "all". Dès qu'un format est épinglé, ce texte fait place à
-// l'onglet autonome "only selected" (surligne ou non la sélection dans le diagramme, indépendamment
-// de tout le reste) suivi de chaque format sélectionné, sous la même forme flottante et cliquable.
+// l'onglet autonome "Sélectionnés" (surligne ou non la sélection dans le diagramme, indépendamment
+// de tout le reste) suivi de chaque format sélectionné : actif, cliquable pour (dé)sélectionner et
+// ouvrir sa fiche, avec une croix dédiée pour le retirer directement.
 function buildLegendTop(){
   legendTop.innerHTML = '';
   if(selectedIds.size === 0){
     const placeholder = document.createElement('button');
     placeholder.className = 'ghost-chip select-placeholder';
-    placeholder.innerHTML = 'select a <span class="ghost-float-inner ghost-strong">Surface Sensible</span>';
+    placeholder.innerHTML = 'choisis une <span class="ghost-float-inner ghost-strong">surface sensible</span>';
     placeholder.title = 'Activer l\'onglet "all"';
     placeholder.addEventListener('click', () => {
       Object.keys(FAMILIES).forEach(k => activeFamilies.add(k));
@@ -1059,7 +987,7 @@ function buildLegendTop(){
   const onlySelBtn = document.createElement('button');
   onlySelBtn.classList.add('legend-tab-big');
   if(highlightSelected) onlySelBtn.classList.add('active');
-  onlySelBtn.textContent = 'only selected';
+  onlySelBtn.textContent = 'Sélectionnés';
   onlySelBtn.title = 'Surligner ou non la sélection dans le diagramme';
   onlySelBtn.addEventListener('click', () => {
     highlightSelected = !highlightSelected;
@@ -1071,12 +999,28 @@ function buildLegendTop(){
   [...selectedIds].forEach(id => {
     const d = DATA.find(x => x.id === id);
     if(!d) return;
-    const chip = document.createElement('button');
-    chip.className = 'ghost-chip';
+    const chip = document.createElement('span');
+    chip.className = 'ghost-chip active';
+    chip.style.color = d.color;
     chip.dataset.id = d.id; // évite que le clic-extérieur-ferme-la-modale ne s'applique à ce bouton
-    chip.innerHTML = `<span class="ghost-float-inner">${d.name}</span>`;
-    chip.title = 'Ouvrir la fiche détaillée';
-    chip.addEventListener('click', () => openModal(d));
+
+    const name = document.createElement('span');
+    name.className = 'ghost-float-inner ghost-chip-name';
+    name.textContent = d.name;
+    name.title = 'Ouvrir la fiche détaillée (clic : désélectionne aussi)';
+    name.tabIndex = 0;
+    name.setAttribute('role', 'button');
+    name.addEventListener('click', () => { toggleSelect(d.id); openModal(d); });
+    name.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleSelect(d.id); openModal(d); } });
+    chip.appendChild(name);
+
+    const remove = document.createElement('button');
+    remove.className = 'ghost-chip-remove';
+    remove.textContent = '×';
+    remove.title = 'Retirer de la sélection';
+    remove.addEventListener('click', (e) => { e.stopPropagation(); toggleSelect(d.id); });
+    chip.appendChild(remove);
+
     legendTop.appendChild(chip);
   });
 }
@@ -1331,24 +1275,9 @@ function buildTables(){
   });
 }
 
-// ---------- Barre d'outils : recherche + sélection rapide de format ----------
+// ---------- Barre d'outils : un seul champ combiné — on tape pour filtrer, ou on clique
+// dedans (vide) pour dérouler tous les formats, comme un menu déroulant classique. ----------
 function buildQuickTools(){
-  const formatSelect = document.getElementById('quick-select-format');
-  formatSelect.innerHTML = '<option value="">Aller à un format…</option>';
-  DATA.forEach(d => {
-    const opt = document.createElement('option');
-    opt.value = d.id;
-    opt.textContent = d.name;
-    formatSelect.appendChild(opt);
-  });
-  formatSelect.addEventListener('change', () => {
-    const d = DATA.find(x => x.id === formatSelect.value);
-    if(!d) return;
-    toggleSelect(d.id);
-    openModal(d);
-    formatSelect.value = '';
-  });
-
   const input = document.getElementById('quick-search-input');
   const results = document.getElementById('quick-search-results');
 
@@ -1361,9 +1290,8 @@ function buildQuickTools(){
 
   function runSearch(){
     const term = input.value.trim().toLowerCase();
-    if(!term){ results.style.display = 'none'; results.innerHTML = ''; return; }
-    // cherche à la fois dans les noms de formats et les noms de caméras
-    const matches = DATA.filter(d =>
+    // champ vide : liste complète, comme un menu déroulant ; sinon, filtre formats + caméras.
+    const matches = !term ? DATA : DATA.filter(d =>
       d.name.toLowerCase().includes(term) ||
       (d.cameras && d.cameras.some(c => c.toLowerCase().includes(term)))
     );
@@ -1375,7 +1303,7 @@ function buildQuickTools(){
         const row = document.createElement('div');
         row.className = 'search-result';
         row.style.borderLeftColor = d.color;
-        const camMatch = d.cameras ? d.cameras.filter(c => c.toLowerCase().includes(term)) : [];
+        const camMatch = term && d.cameras ? d.cameras.filter(c => c.toLowerCase().includes(term)) : [];
         row.innerHTML = `
           <div class="sr-format" style="color:${d.color}">${highlight(d.name, term)}</div>
           ${camMatch.length ? `<div class="sr-cameras">${camMatch.map(c => highlight(c, term)).join(' · ')}</div>` : ''}
@@ -1393,6 +1321,7 @@ function buildQuickTools(){
   }
 
   input.addEventListener('input', runSearch);
+  input.addEventListener('focus', runSearch);
   document.addEventListener('click', (e) => {
     if(!e.target.closest('.compare-hint')) results.style.display = 'none';
   });
