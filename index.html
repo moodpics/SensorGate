@@ -21,30 +21,64 @@
   a{ color: #f3aa3d; }
   .wrap{ max-width: 1220px; margin: 0 auto; padding: 56px 28px 80px; }
 
-  header.hero{ border-bottom: 1px solid var(--line); padding-bottom: 36px; margin-bottom: 44px; position: relative; overflow: hidden; }
+  header.hero{ border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 6px; position: relative; overflow: hidden; }
   .ghost-fx{ pointer-events: none; animation: ghost-evaporate 5s ease-out forwards; }
   .ghost-fx .ghost-float-inner{ display:inline-block; animation: ghost-float 7s ease-in-out 5s infinite; }
+  /* Uniquement un mouvement vertical (jamais horizontal) : le mot reste ancré à gauche et ne
+     risque jamais de sortir du cadre, quelle que soit la largeur d'écran ("format"). */
   @keyframes ghost-evaporate{
     0%{ opacity: 0.85; filter: blur(0px); transform: translate(0, 0); }
-    100%{ opacity: 0.5; filter: blur(2.5px); transform: translate(120px, -36px); }
+    100%{ opacity: 0.5; filter: blur(2.5px); transform: translate(0, -20px); }
   }
   @keyframes ghost-float{
     0%, 100%{ transform: translate(0, 0); }
-    50%{ transform: translate(6px, -16px); }
+    50%{ transform: translate(0, -10px); }
   }
-  .ghost-text{
-    position: absolute; top: 90px; left: 480px; z-index: 0;
+  /* Loge sous "image areas", à peine à cheval sur son bord bas (juste un frôlement, pas un
+     recouvrement) — puis dérive à peine, presque imperceptiblement, vers "dimensions / ratios"
+     et revient. Jamais tronqué : ni largeur maximale, ni overflow, sur cet élément. */
+  @keyframes ghost-drift{
+    0%, 100%{ transform: translate(0, 0); }
+    50%{ transform: translate(9px, -2px); }
+  }
+  h1{ position: relative; z-index: 1; margin: 0 0 60px; }
+  .ghost-strip{
+    position: absolute; top: 132px; left: 20px; z-index: 0;
     font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.01em;
-    font-size: clamp(28px, 4.4vw, 46px); color: var(--paper); white-space: nowrap;
+    font-size: clamp(34px, 5.8vw, 60px); color: var(--paper); white-space: nowrap;
   }
+  .ghost-strip .ghost-drift-inner{ display:inline-block; animation: ghost-drift 20s ease-in-out infinite; }
+  h1 .title-line1{ display:inline-block; font-size: clamp(26px, 4.2vw, 44px); }
+  h1 .title-big{ display:inline-block; font-size: clamp(40px, 6.4vw, 68px); }
+  h1 .amp-yellow{ color: #f4d35e; }
+  /* Typo normale, sans effet ni flottement — simple continuation du titre en plus petit et plus discret. */
+  h1 .title-plain{
+    display:inline-block; vertical-align: middle; margin-left: 10px;
+    font-weight: 400; letter-spacing: normal; font-size: clamp(15px, 1.8vw, 20px);
+    color: var(--paper-dim); white-space: normal;
+  }
+  /* Variante compacte de la même typo/effet flottant, réutilisée dans la barre d'outils
+     (placeholder de sélection et formats épinglés) plutôt que dans l'en-tête. */
+  .ghost-chip{
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.01em;
+    font-size: 15px; color: var(--paper); background: none; border: none; padding: 6px 2px;
+    cursor: pointer; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ghost-chip .ghost-float-inner{ animation-duration: 6s; animation-delay: 0s; }
+  .ghost-chip:hover{ color: #f3aa3d; }
+  .ghost-chip.select-placeholder{ color: var(--paper-dim); }
+  .ghost-chip.select-placeholder .ghost-strong{ color: var(--paper); }
   .eyebrow{
     font-family:'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em;
     text-transform: uppercase; color: #f3aa3d; margin-bottom: 14px; display:flex; align-items:center; gap: 10px;
   }
   .eyebrow::before{ content:""; width: 22px; height: 1px; background: #e35a2e; display:inline-block; }
-  h1{ font-size: clamp(32px, 5vw, 52px); line-height: 1.05; font-weight: 700; margin: 0 0 16px; letter-spacing: -0.01em; }
-  h1 span{ color: #f3aa3d; }
-  .hero p{ max-width: 660px; color: var(--paper-dim); font-size: 15px; line-height: 1.6; margin: 0; }
+  h1{ font-size: clamp(32px, 5vw, 52px); line-height: 1.05; font-weight: 700; letter-spacing: -0.01em; }
+  h1 .amp{ color: #f3aa3d; }
+  .hero p{
+    max-width: none; color: var(--paper-dim); font-size: 14px; line-height: 1.5; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
 
   .section-label{
     font-family:'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
@@ -55,8 +89,9 @@
 
   .diagram-card{ background: var(--bg-panel); border: 1px solid var(--line); border-radius: 4px; padding: 28px 28px 22px; margin-bottom: 20px; position: relative; }
 
-  .toolbar{ display:flex; flex-wrap:wrap; align-items:center; gap: 10px 18px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
-  .legend{ display:flex; flex-wrap: wrap; gap: 8px; }
+  .toolbar{ display:flex; flex-wrap:wrap; align-items:flex-start; gap: 10px 18px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
+  .toolbar-tabs{ display:flex; flex-direction:column; gap: 10px; flex: 1 1 auto; min-width: 0; }
+  .legend{ display:flex; flex-wrap: wrap; align-items:center; gap: 8px; min-height: 36px; }
   .legend button{
     font-family:'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.02em;
     background: var(--bg-raised); border: 1px solid var(--line); color: var(--paper-dim);
@@ -67,9 +102,7 @@
   .legend button.active{ color: var(--paper); border-color: #e35a2e; background: #2a2419; }
   .legend button:not(.active){ opacity: .5; }
   .legend button:hover{ opacity: 1; }
-  .legend button.legend-toggle-all{ border-style: dashed; font-weight: 600; margin-right: 4px; }
-  .legend button.legend-toggle-all .opt-word{ opacity: .5; transition: opacity .15s ease, color .15s ease; }
-  .legend button.legend-toggle-all .opt-word.opt-active{ opacity: 1; color: #f3aa3d; }
+  .legend button.legend-tab-big{ font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; border-style: dashed; }
 
   .jump-select{
     font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--paper);
@@ -132,11 +165,6 @@
   }
   svg.diagram-svg text.fname{ pointer-events: auto; cursor: pointer; }
   svg.diagram-svg .fname-sub{ font-family:'JetBrains Mono', monospace; font-size: 8.5px; fill: var(--paper-dim); font-style: italic; }
-  svg.diagram-svg .ref-tag{
-    /* liseré fin et discret pour rester lisible même quand plusieurs codes de référence se serrent
-       au même endroit (petits formats imbriqués) ou tombent sur une zone sombre de l'image. */
-    paint-order: stroke; stroke: rgba(255,250,240,0.85); stroke-width: 0.6px; stroke-linejoin: round;
-  }
 
   .inspector{ width: 100%; box-sizing: border-box; background: var(--bg-raised); border: 1px solid var(--line); border-radius: 3px; padding: 18px; margin-top: 20px; }
   .inspector .placeholder{ color: var(--paper-dim); font-size: 13px; line-height: 1.6; }
@@ -286,19 +314,19 @@
 
   <header class="hero">
     <div class="eyebrow">fiche de référence — chef opérateur</div>
-    <h1>image area<br>dimensions <span>&</span> ratios<br>film <span>&</span> digital</h1>
-    <div class="ghost-text ghost-fx" aria-hidden="true"><span class="ghost-float-inner">surface sensible</span></div>
-    <p>Comparatif visuel des surfaces de capture réellement exposées — du 16mm au 65mm IMAX,
-    la photo argentique, et leur équivalent en capteurs digital modernes.
-    Survolez un nom pour un aperçu ; cliquez dessus pour l'épingler et ouvrir sa fiche détaillée
-    avec photo et caméras associées.</p>
+    <h1><span class="title-line1">film <span class="amp">&amp;</span> digital cameras</span><br><span class="title-big">image areas</span><span class="title-plain"> dimensions mm × mm <span class="amp-yellow">&amp;</span> ratios 1.??:1</span></h1>
+    <div class="ghost-strip ghost-fx" aria-hidden="true"><span class="ghost-drift-inner">surface sensible</span></div>
+    <p>Comparatif visuel des surfaces de capture réellement exposées — du 16mm au 65mm IMAX, la photo argentique, et les capteurs digitaux.</p>
   </header>
 
   <div class="section-label"><b>01 — Diagramme à l'échelle</b><span class="n">· survolez pour prévisualiser, cliquez pour comparer et voir le détail</span></div>
 
   <div class="diagram-card">
     <div class="toolbar">
-      <div class="legend" id="legend"><button><span class="dot" style="background:#f3aa3d"></span>16mm</button><button><span class="dot" style="background:#e35a2e"></span>35mm</button><button><span class="dot" style="background:#92602e"></span>Large Format film</button><button><span class="dot" style="background:#c9a876"></span>Pellicule photo</button><button><span class="dot" style="background:#4fa8d9"></span>Digital</button></div>
+      <div class="toolbar-tabs">
+        <div class="legend" id="legend-top"></div>
+        <div class="legend" id="legend-bottom"></div>
+      </div>
       <div class="compare-hint" style="position:relative">
         <input type="text" id="quick-search-input" placeholder="Rechercher un format ou une caméra..." style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--bg-raised);border:1px solid var(--line);color:var(--paper);padding:7px 10px;border-radius:3px;width:220px;max-width:100%">
         <select id="quick-select-format" class="jump-select">
@@ -476,10 +504,10 @@ const REF_SHORT_LABEL = { 's16':'S16', 's35-4p':'S35', 'photo-135':'FF 35mm', 'i
 // et actif comme les références, puisque son image sert de fond permanent au diagramme.
 const ALWAYS_VISIBLE_IDS = new Set(['photo-5x7']);
 // Le petit code en coin (ex. "S16", "IMAX 65mm") des références est TOUJOURS affiché, quel que
-// soit l'état des onglets ou du mode "sélection uniquement" — contrairement au nom complet + ligne
-// de rappel colorée, qui eux respectent l'onglet actif (voir isAlwaysVisible).
+// soit l'état des onglets — contrairement au nom complet + ligne de rappel colorée, qui eux
+// respectent l'onglet de famille actif (voir isAlwaysVisible).
 function isRefTagged(d){ return d.isRef || ALWAYS_VISIBLE_IDS.has(d.id); }
-function isAlwaysVisible(d){ if(onlySelected) return false; return d.isRef || ALWAYS_VISIBLE_IDS.has(d.id); }
+function isAlwaysVisible(d){ return d.isRef || ALWAYS_VISIBLE_IDS.has(d.id); }
 
 const GROUP_MAX_W = {};
 DATA.forEach(d => {
@@ -489,7 +517,8 @@ DATA.forEach(d => {
 
 const chart = document.getElementById('chart');
 const inspector = document.getElementById('inspector');
-const legend = document.getElementById('legend');
+const legendTop = document.getElementById('legend-top');
+const legendBottom = document.getElementById('legend-bottom');
 const selectedIds = new Set();
 
 function svgNS(tag, attrs){
@@ -532,10 +561,9 @@ function drawRuler(){
 }
 
 const activeFamilies = new Set();
-// Mode "sélection uniquement" : quand actif, seuls les formats épinglés au comparateur
-// s'affichent dans le diagramme — les onglets de famille sont ignorés pour cet affichage.
-let onlySelected = false;
-function familyOrSelectionActive(d){ return onlySelected ? selectedIds.has(d.id) : activeFamilies.has(d.fam); }
+// Onglet "only selected" : totalement autonome, indépendant des onglets de famille — quand actif,
+// les formats épinglés au comparateur sont surlignés dans le diagramme ; sinon, ils ne le sont pas.
+let highlightSelected = false;
 const LABELED = DATA.filter(d => !d.skipDiagram || d.shareWith).map(d => d.id);
 
 let hoveredId = null;
@@ -787,6 +815,7 @@ function toggleSelect(id){
   else selectedIds.add(id);
   applyPersistentHighlight();
   renderCompareSummary();
+  buildLegendTop();
   document.getElementById('clear-selection').classList.toggle('show', selectedIds.size > 0);
   updateDetail();
 }
@@ -795,7 +824,9 @@ function applyPersistentHighlight(){
   chart.querySelectorAll('rect.frame, .ghost-outline, .leader, g.label-group').forEach(el => {
     el.classList.remove('selected', 'select-dim');
   });
-  if(selectedIds.size === 0) return;
+  // L'onglet "only selected" (ligne 1) est autonome : sans lui, la sélection reste épinglée
+  // au comparateur mais n'est pas surlignée dans le diagramme.
+  if(!highlightSelected || selectedIds.size === 0) return;
   chart.querySelectorAll('[data-id]:not(.frame-image)').forEach(el => {
     const on = selectedIds.has(el.dataset.id);
     el.classList.toggle('selected', on);
@@ -813,7 +844,7 @@ function render(){
   sorted.forEach(d => {
     const w = d.w * SCALE, h = d.h * SCALE;
     const x = CENTER_X - w/2, y = CENTER_Y - h/2;
-    const famActive = familyOrSelectionActive(d);
+    const famActive = activeFamilies.has(d.fam);
     const rect = svgNS('rect', d.isRef ? {
       // référence standard : aucun remplissage, contour invisible par défaut (n'apparaît qu'au survol/sélection) —
       // toujours affichée quel que soit l'état des catégories, l'image se voit intégralement à travers.
@@ -862,7 +893,7 @@ function render(){
   refDraws.forEach(({ d, x, y, w, h }) => {
     const outline = svgNS('rect', { x:x, y:y, width:w, height:h, fill:'none', stroke:'#000', 'stroke-width':0.6, 'stroke-opacity':'0.8', 'pointer-events':'none', class:'ref-outline' });
     chart.appendChild(outline);
-    const tag = svgNS('text', { x:x+w-5, y:y+13, 'text-anchor':'end', fill:'#000', 'fill-opacity':'0.8', 'font-family':'JetBrains Mono, monospace', 'font-size':'9.5', 'font-weight':'600', 'pointer-events':'none', class:'ref-tag' });
+    const tag = svgNS('text', { x:x+w-5, y:y+13, 'text-anchor':'end', fill:'#000', 'fill-opacity':'0.8', 'font-family':'JetBrains Mono, monospace', 'font-size':'9.5', 'font-weight':'800', 'pointer-events':'none', class:'ref-tag' });
     tag.textContent = REF_SHORT_LABEL[d.id] || d.name;
     chart.appendChild(tag);
   });
@@ -872,7 +903,7 @@ function render(){
     if(!shared) return;
     const w = shared.w * SCALE, h = shared.h * SCALE;
     const x = CENTER_X - w/2 + 3, y = CENTER_Y - h/2 + 3;
-    const dimmed = !familyOrSelectionActive(d);
+    const dimmed = !activeFamilies.has(d.fam);
     const ghost = svgNS('rect', {
       x:x, y:y, width:w-6, height:h-6, fill:'none',
       stroke:d.color, 'stroke-width':1.6, 'stroke-dasharray':'1 3.5', 'stroke-linecap':'round'
@@ -884,7 +915,7 @@ function render(){
   });
 
   DATA.filter(d => d.squeeze).forEach(d => {
-    const dimmed = !familyOrSelectionActive(d);
+    const dimmed = !activeFamilies.has(d.fam);
     const w = d.w * SCALE, h = d.h * SCALE;
     const dw = w * d.squeeze;
     const x = CENTER_X - dw/2, y = CENTER_Y - h/2;
@@ -929,12 +960,12 @@ function render(){
   chart.setAttribute('height', neededHeight);
   chart.setAttribute('viewBox', `0 0 ${neededWidth} ${neededHeight}`);
 
-  // Rien d'actif du tout (aucun onglet ; ou, en mode "sélection uniquement", aucune sélection) :
-  // aucun texte de format ni ligne de rappel ne doit apparaître, même pour les références et le 5×7.
-  const nothingActive = onlySelected ? selectedIds.size === 0 : activeFamilies.size === 0;
+  // Rien d'actif du tout (aucun onglet de famille) : aucun texte de format ni ligne de rappel ne
+  // doit apparaître, même pour les références et le 5×7.
+  const nothingActive = activeFamilies.size === 0;
   items.forEach(it => {
     const d = it.d;
-    const famActive = familyOrSelectionActive(d);
+    const famActive = activeFamilies.has(d.fam);
     // Sinon, une référence ne se surligne par défaut que si SA propre famille est active
     // (pas dès qu'une autre l'est, ni simplement parce qu'elle est toujours "intégrée").
     const dimmed = nothingActive ? true : (!isAlwaysVisible(d) && !famActive);
@@ -1005,34 +1036,68 @@ function renderCompareSummary(){
   });
 }
 
+// Ligne 1 (haut) : tant que rien n'est sélectionné, un texte flottant invite à choisir un format —
+// cliquer dessus active l'onglet "all". Dès qu'un format est épinglé, ce texte fait place à
+// l'onglet autonome "only selected" (surligne ou non la sélection dans le diagramme, indépendamment
+// de tout le reste) suivi de chaque format sélectionné, sous la même forme flottante et cliquable.
+function buildLegendTop(){
+  legendTop.innerHTML = '';
+  if(selectedIds.size === 0){
+    const placeholder = document.createElement('button');
+    placeholder.className = 'ghost-chip select-placeholder';
+    placeholder.innerHTML = 'select a <span class="ghost-float-inner ghost-strong">Surface Sensible</span>';
+    placeholder.title = 'Activer l\'onglet "all"';
+    placeholder.addEventListener('click', () => {
+      Object.keys(FAMILIES).forEach(k => activeFamilies.add(k));
+      render();
+      buildLegend();
+    });
+    legendTop.appendChild(placeholder);
+    return;
+  }
+
+  const onlySelBtn = document.createElement('button');
+  onlySelBtn.classList.add('legend-tab-big');
+  if(highlightSelected) onlySelBtn.classList.add('active');
+  onlySelBtn.textContent = 'only selected';
+  onlySelBtn.title = 'Surligner ou non la sélection dans le diagramme';
+  onlySelBtn.addEventListener('click', () => {
+    highlightSelected = !highlightSelected;
+    applyPersistentHighlight();
+    buildLegendTop();
+  });
+  legendTop.appendChild(onlySelBtn);
+
+  [...selectedIds].forEach(id => {
+    const d = DATA.find(x => x.id === id);
+    if(!d) return;
+    const chip = document.createElement('button');
+    chip.className = 'ghost-chip';
+    chip.dataset.id = d.id; // évite que le clic-extérieur-ferme-la-modale ne s'applique à ce bouton
+    chip.innerHTML = `<span class="ghost-float-inner">${d.name}</span>`;
+    chip.title = 'Ouvrir la fiche détaillée';
+    chip.addEventListener('click', () => openModal(d));
+    legendTop.appendChild(chip);
+  });
+}
+
 function buildLegend(){
-  legend.innerHTML = '';
+  legendBottom.innerHTML = '';
   const keys = Object.keys(FAMILIES);
 
-  // "all or selected" : bascule entre tout afficher (tous les onglets) et n'afficher que les
-  // formats épinglés au comparateur — le mot correspondant à l'état actif est mis en évidence.
-  const masterBtn = document.createElement('button');
-  masterBtn.classList.add('legend-toggle-all');
-  masterBtn.title = 'Tout afficher, ou uniquement les formats sélectionnés';
-  masterBtn.innerHTML = '<span class="opt-word">all</span> or <span class="opt-word">selected</span>';
-  const optAll = masterBtn.children[0], optSelected = masterBtn.children[1];
-  function syncMasterBtn(){
-    masterBtn.classList.toggle('active', onlySelected || keys.every(k => activeFamilies.has(k)));
-    optAll.classList.toggle('opt-active', !onlySelected);
-    optSelected.classList.toggle('opt-active', onlySelected);
-  }
-  syncMasterBtn();
-  masterBtn.addEventListener('click', () => {
-    if(onlySelected){
-      onlySelected = false;
-      keys.forEach(k => activeFamilies.add(k));
-    } else {
-      onlySelected = true;
-    }
+  // "all" : onglet autonome, indépendant de "only selected" — s'active ou se désactive tout seul.
+  // Activé : tous les formats s'ouvrent (tous les onglets de famille). Désactivé : ils disparaissent tous.
+  const allBtn = document.createElement('button');
+  allBtn.classList.add('legend-tab-big');
+  if(keys.every(k => activeFamilies.has(k))) allBtn.classList.add('active');
+  allBtn.textContent = 'all';
+  allBtn.addEventListener('click', () => {
+    if(keys.every(k => activeFamilies.has(k))) activeFamilies.clear();
+    else keys.forEach(k => activeFamilies.add(k));
     render();
     buildLegend();
   });
-  legend.appendChild(masterBtn);
+  legendBottom.appendChild(allBtn);
 
   keys.forEach(key => {
     const fam = FAMILIES[key];
@@ -1040,14 +1105,15 @@ function buildLegend(){
     if(activeFamilies.has(key)) btn.classList.add('active');
     btn.innerHTML = `<span class="dot" style="background:${fam.dot}"></span>${fam.label}`;
     btn.addEventListener('click', () => {
-      onlySelected = false;
       if(activeFamilies.has(key)){ activeFamilies.delete(key); btn.classList.remove('active'); }
       else { activeFamilies.add(key); btn.classList.add('active'); }
       render();
-      syncMasterBtn();
+      allBtn.classList.toggle('active', keys.every(k => activeFamilies.has(k)));
     });
-    legend.appendChild(btn);
+    legendBottom.appendChild(btn);
   });
+
+  buildLegendTop();
 }
 
 document.getElementById('clear-selection').addEventListener('click', (e) => {
@@ -1055,6 +1121,7 @@ document.getElementById('clear-selection').addEventListener('click', (e) => {
   selectedIds.clear();
   applyPersistentHighlight();
   renderCompareSummary();
+  buildLegendTop();
   document.getElementById('clear-selection').classList.remove('show');
   updateDetail();
 });
