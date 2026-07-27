@@ -71,7 +71,6 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .hero p:first-of-type{ margin-top: 0; }
-  .hero p.lede{ font-style: italic; }
 
   .section-label{
     font-family:'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
@@ -82,11 +81,51 @@
 
   .diagram-card{ background: var(--bg-panel); border: 1px solid var(--line); border-radius: 4px; padding: 28px 28px 22px; margin-bottom: 20px; position: relative; }
 
+  /* Mobile : dès qu'un onglet s'active sur un écran étroit, le diagramme passe en plein cadre,
+     pivoté de 90° — il faut tourner le téléphone pour le voir à l'endroit, comme un mode paysage
+     forcé. Pivoté en même temps : les onglets (poussés à droite avant rotation, donc en bas une
+     fois le cadre tourné) restent accessibles sans revenir en mode droit. La croix ramène à la
+     page normale (le reste du contenu — tableaux, notes — n'est visible qu'en mode droit). */
+  .mobile-close{ display:none; }
+  @media (max-width: 700px){
+    /* Page d'accueil mobile épurée : seule la recherche + "Sélectionné(s)" apparaissent — les
+       onglets de famille ne reviennent qu'une fois en plein cadre (cf. requestMobileFullscreen). */
+    #legend-bottom{ display: none; }
+    .diagram-card.mobile-full #legend-bottom{ display: flex; }
+    .diagram-card.mobile-full{
+      position: fixed; inset: 0; z-index: 500; margin: 0; border: none; border-radius: 0;
+      width: 100vh; height: 100vw;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(90deg);
+      background: var(--bg-panel);
+      padding: 14px; box-sizing: border-box;
+      display: flex; flex-direction: row; align-items: stretch; gap: 12px;
+      overflow: hidden;
+    }
+    .diagram-card.mobile-full .inspector{ display: none; }
+    .diagram-card.mobile-full .diagram-area{ order: 1; flex: 1 1 auto; min-width: 0; overflow: auto; }
+    .diagram-card.mobile-full .diagram-area svg{ height: 100%; width: auto; max-width: none; }
+    .diagram-card.mobile-full .toolbar{
+      order: 2; flex: 0 0 210px; margin: 0; padding: 0; border: none;
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .diagram-card.mobile-full .mobile-close{
+      display: flex; position: absolute; top: 14px; right: 14px; z-index: 10;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(0,0,0,0.65); color: #fff; border: 2px solid rgba(255,255,255,0.55);
+      font-size: 24px; line-height: 1; align-items: center; justify-content: center; cursor: pointer;
+    }
+    /* Le titre et l'intro passent sur plusieurs lignes plutôt que d'être tronqués — sur un écran
+       étroit, une seule ligne forcée les couperait bien avant la fin. */
+    h1, .hero p{ white-space: normal; overflow: visible; text-overflow: clip; }
+  }
+
   .toolbar{ display:flex; flex-direction:column; gap: 10px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
-  /* Ligne "Sélectionnés" + formats sélectionnés, sous les onglets de famille — les puces
-     s'affichent à côté de l'onglet, dans l'espace disponible de la même ligne. */
-  .toolbar-selected-row{ display:flex; flex-wrap:wrap; align-items:flex-start; gap: 10px 24px; }
-  .selected-chips{ flex: 1 1 200px; display:flex; flex-direction:column; gap: 5px; min-width: 160px; padding-top: 3px; }
+  /* Une seule ligne d'onglets : la barre de recherche en tête, puis "Sélectionné(s)", "all" et
+     chaque famille à sa suite. Les puces sélectionnées s'affichent juste en dessous. */
+  .tabs-row{ display:flex; flex-wrap: wrap; align-items:center; gap: 10px; }
+  .selected-chips{ display:flex; flex-direction:column; gap: 5px; min-width: 160px; }
+  .selected-chips:empty{ display:none; }
   .legend{ display:flex; flex-wrap: wrap; align-items:center; gap: 8px; min-height: 36px; }
   .legend button{
     font-family:'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.02em;
@@ -108,13 +147,13 @@
   .combo-input{
     font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--paper);
     background: var(--bg-raised); border: 1px solid var(--line); padding: 10px 14px; border-radius: 3px;
-    width: 340px; max-width: 100%; transition: border-color .15s ease, box-shadow .15s ease;
+    width: 200px; max-width: 100%; transition: border-color .15s ease, box-shadow .15s ease;
   }
   .combo-input:hover, .combo-input:focus{ border-color: #f3aa3d; box-shadow: 0 0 0 2px rgba(243,170,61,0.25); outline: none; }
   .combo-input::placeholder{ color: var(--paper-dim); }
 
   .compare-hint{
-    margin: 0 0 20px; font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--paper-dim);
+    font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--paper-dim);
     display:flex; flex-wrap:wrap; align-items:center; gap: 10px; min-width:0; max-width:100%;
   }
 
@@ -125,12 +164,12 @@
   /* Styles de texte de la vue "agrandissement" (cf. appendZoomContent) — réutilisés par la ligne
      "agrandissement" du tableau, les cartes du comparateur et la fiche récap exportable. */
   .hz-name{
-    font-family:'JetBrains Mono', monospace; font-weight: 700; fill: #fff;
-    paint-order: stroke; stroke: rgba(0,0,0,0.75); stroke-linejoin: round;
+    font-family:'JetBrains Mono', monospace; font-weight: 500; fill: #000;
+    paint-order: stroke; stroke: rgba(255,255,255,0.85); stroke-linejoin: round;
   }
   .hz-dim{
-    font-family:'JetBrains Mono', monospace; font-weight: 700; fill: #fff;
-    paint-order: stroke; stroke: rgba(0,0,0,0.8); stroke-linejoin: round;
+    font-family:'JetBrains Mono', monospace; font-weight: 500; fill: #000;
+    paint-order: stroke; stroke: rgba(255,255,255,0.85); stroke-linejoin: round;
   }
   .hz-cat{ font-family:'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight:700; }
   .hz-row{ display:flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line-soft); font-size: 12px; }
@@ -161,6 +200,9 @@
   svg.diagram-svg rect.frame.selected{ stroke-width: calc(5px * var(--ds)); opacity: 1 !important; filter:none; }
   svg.diagram-svg .ghost-outline.selected{ opacity: 1 !important; stroke-width: calc(3.8px * var(--ds)); }
   svg.diagram-svg .leader.selected{ opacity: 1 !important; }
+  /* Le cadre désqueezé (en pointillé) doit lui aussi s'épaissir quand son format anamorphique
+     est surligné — sinon seul le petit cadre "captif" en dessous grossit, pas le tracé élargi. */
+  svg.diagram-svg .leader.iso-active rect, svg.diagram-svg .leader.selected rect{ stroke-width: calc(3.6px * var(--ds)); }
   svg.diagram-svg g.label-group.selected{ opacity: 1 !important; pointer-events: auto; }
   svg.diagram-svg g.label-group.selected text.fname{ text-decoration: underline; }
   svg.diagram-svg g.label-group.selected circle{ r: calc(3.4px * var(--ds)); }
@@ -184,6 +226,11 @@
   }
   svg.diagram-svg text.fname{ pointer-events: auto; cursor: pointer; }
   svg.diagram-svg .fname-sub{ font-family:'JetBrains Mono', monospace; font-size: calc(8.5px * var(--ds)); fill: var(--paper-dim); font-style: italic; }
+  svg.diagram-svg .col-heading{
+    font-family:'JetBrains Mono', monospace; font-size: calc(10px * var(--ds)); font-weight:700; letter-spacing: 0.1em;
+    text-transform: uppercase; fill: var(--paper-dim);
+    paint-order: stroke; stroke: rgba(15,12,8,0.8); stroke-width: calc(3px * var(--ds)); stroke-linejoin: round;
+  }
 
   .inspector{ width: 100%; box-sizing: border-box; background: var(--bg-raised); border: 1px solid var(--line); border-radius: 3px; padding: 18px; margin-top: 20px; }
   .inspector .placeholder{ color: var(--paper-dim); font-size: 13px; line-height: 1.6; }
@@ -226,10 +273,9 @@
     width: 30px; height: 30px; border-radius: 50%; font-size: 18px; line-height: 1; cursor: pointer; z-index: 3;
   }
   .recap-close:hover{ background: rgba(0,0,0,0.75); }
-  /* En-tête HTML (titre + onglet de sélection) au-dessus de l'image — distincte du titre "en dur"
-     dans le SVG exporté (le PNG reste complet même sans cette barre, propre à l'écran). */
-  .recap-header{ display:flex; align-items:center; justify-content:space-between; gap: 14px; padding: 20px 52px 0 20px; }
-  .recap-header-title{ font-size: 19px; font-weight: 700; line-height: 1.25; color: var(--paper); }
+  /* En-tête HTML : seulement l'onglet de sélection — le titre vit uniquement dans le SVG (cf.
+     buildRecapSVG), pour n'apparaître qu'une fois et rester présent dans le PNG exporté. */
+  .recap-header{ display:flex; align-items:center; justify-content:flex-end; gap: 14px; padding: 20px 52px 0 20px; }
   .recap-visual{ display:block; width: 100%; line-height: 0; }
   .recap-visual svg{ display:block; width: 100%; height: auto; }
   .recap-actions{ padding: 16px 20px 20px; display:flex; justify-content:flex-end; gap: 12px; }
@@ -335,22 +381,22 @@
       <div class="eyebrow">fiche de référence — chef opérateur</div>
       <div class="cam-badge">digital <span class="amp">&amp;</span> film cameras</div>
     </div>
-    <h1>La <span class="hl">surface d'enregistrement</span> de l'image définit son cadrage</h1>
-    <p class="lede">En effet, la focale donne tout le potentiel d'angle de vue, mais le format d'enregistrement recadre dedans.</p>
+    <h1>Le <span class="hl">Capteur</span> donne le cadre</h1>
+    <p>Principe : la focale donne l'angle de champ et le capteur cadre dedans</p>
   </header>
 
-  <div class="compare-hint" style="position:relative">
-    <input type="text" id="quick-search-input" class="combo-input" placeholder="compare des formats" autocomplete="off">
-    <div id="quick-search-results" style="display:none;position:absolute;top:100%;left:0;margin-top:6px;width:320px;max-height:320px;overflow-y:auto;background:var(--bg-raised);border:1px solid var(--line);border-radius:4px;z-index:20;padding:6px"></div>
-  </div>
-
-  <div class="diagram-card">
+  <div class="diagram-card" id="diagram-card">
+    <button class="mobile-close" id="mobile-close" title="Fermer la vue plein cadre">×</button>
     <div class="toolbar">
-      <div class="legend" id="legend-bottom"></div>
-      <div class="toolbar-selected-row">
+      <div class="tabs-row" id="tabs-row">
+        <div class="compare-hint" style="position:relative">
+          <input type="text" id="quick-search-input" class="combo-input" placeholder="choisis un format" autocomplete="off">
+          <div id="quick-search-results" style="display:none;position:absolute;top:100%;left:0;margin-top:6px;width:320px;max-height:320px;overflow-y:auto;background:var(--bg-raised);border:1px solid var(--line);border-radius:4px;z-index:20;padding:6px"></div>
+        </div>
         <div class="legend" id="legend-top"></div>
-        <div class="selected-chips" id="selected-chips"></div>
+        <div class="legend" id="legend-bottom"></div>
       </div>
+      <div class="selected-chips" id="selected-chips"></div>
     </div>
     <div class="diagram-area">
       <svg id="chart" class="diagram-svg" width="900" height="440" viewBox="0 0 900 440"></svg>
@@ -412,7 +458,6 @@
   <div class="recap-card">
     <button class="recap-close" id="recap-close" title="Fermer">×</button>
     <div class="recap-header">
-      <div class="recap-header-title" id="recap-header-title"></div>
       <button class="recap-select" id="recap-select">Sélectionner</button>
     </div>
     <div class="recap-visual" id="recap-visual"></div>
@@ -453,8 +498,8 @@ const DATA = [
 
   { id:'photo-135', name:'FF 35mm photo (135), 36×24, 1.50:1',     fam:'gphoto',   w:36,    h:24,    ratio:'1.50:1',          perf:8,  orient:'h', color:'#e8862f', stockGroup:'photo135', stock:'35mm', isRef:true, cameras:['Leica M','Nikon F','Canon AE-1'], note:'Pellicule photo argentique standard — origine du "Full Frame" en photo comme en cinéma digital. Aussi présent dans l\'onglet Digital (mêmes 36×24mm que le Sony Venice). Référence standard 35mm photo.' },
   { id:'d-ff35',   name:'FF 36×24, Sony Venice 1 & 2, 8K, 1.50:1', fam:'gdigital', w:36,    h:24,    ratio:'1.50:1',          perf:0,  orient:'-', color:'#a855c9', stockGroup:'photo135', resolution:'8640 × 5760 px (8K) · 6048 × 4032 px (mode 6K, Sony Venice)', cameras:['Sony Venice','Sony Venice 2'], note:'Même fenêtre 36×24mm que la référence Full Frame argentique (135) — aussi présent dans l\'onglet Pellicule photo. Le Sony Venice reprend au mm près le format photo historique.' },
-  { id:'photo-6x6', name:'Moyen Format 6×6, 1:1',                  fam:'gphoto',   w:56,    h:56,    ratio:'1:1',             perf:0,  orient:'-', color:'#b8905a', stockGroup:'photo6x6', stock:'120 (moyen format)', cameras:['Hasselblad 500C/M','Rolleiflex TLR'], note:'Pellicule 120 en rouleau — format carré emblématique de la photo de studio et de mode.' },
-  { id:'photo-5x7', name:'Grand Format 5×7", 1.40:1',              fam:'gphoto',   w:178,   h:127,   ratio:'1.40:1',          perf:0, orient:'-', color:'#8a6840', stockGroup:'photo5x7', stock:'plan-film', image:'RefMagritte2.png', cameras:['Chambre photographique (Sinar, Deardorff)'], note:'Plan-film à la feuille — bascules et décentrements, tirages contact haute définition.' },
+  { id:'photo-6x6', name:'Moyen Format Photo, 1:1',                fam:'gphoto',  w:56,    h:56,    ratio:'1:1',             perf:0,  orient:'-', color:'#b8905a', stockGroup:'photo6x6', stock:'120 (moyen format)', cameras:['Hasselblad 500C/M','Rolleiflex TLR'], note:'Pellicule 120 en rouleau — format carré emblématique de la photo de studio et de mode.' },
+  { id:'photo-5x7', name:'Grand Format Photo 5×7", 1.40:1',        fam:'gphoto',  w:178,   h:127,   ratio:'1.40:1',          perf:0, orient:'-', color:'#8a6840', stockGroup:'photo5x7', stock:'plan-film', image:'RefMagritte2.png', cameras:['Chambre photographique (Sinar, Deardorff)'], note:'Plan-film à la feuille — bascules et décentrements, tirages contact haute définition.' },
 
   { id:'d-s35og',  name:'S35mm digital, OG, 1.33:1',   fam:'gdigital', w:24.89, h:18.66, ratio:'1.33:1',          perf:0,  orient:'-', color:'#4fb8bf', stockGroup:'d-s35og', resolution:'variable selon caméra', cameras:['ARRI Alexa Classic','ARRI Amira'], note:'Calqué au mm près sur le S35 film 4-perf — dimensions à revérifier pour Classic/Amira (non confirmées sur fiche technique constructeur).' },
   { id:'d-alexamini', name:'S35mm ARRI Alexa Mini, OG, 3.4K, 1.55:1', fam:'gdigital', w:28.25, h:18.17, ratio:'1.55:1',          perf:0,  orient:'-', color:'#2ec4b6', stockGroup:'d-alexamini', resolution:'3424 × 2202 px (OG 3.4K)', cameras:['ARRI Alexa Mini'], note:'Capteur ALEV III, mode OG 3.4K — 28,25 × 18,17 mm vérifié sur la fiche technique officielle ARRI (Technical Data ALEXA Mini).' },
@@ -495,7 +540,10 @@ function updateDomain(){
   if(DOMAIN_IS_CLEAN){
     pool = [DATA.find(d => d.id === 'photo-5x7')];
   } else {
-    const visible = DIAGRAM_ENTRIES.filter(d => d.isRef || activeFamilies.has(d.fam) || activeSelectedIds.has(d.id));
+    // Le Moyen Format Photo, seul sélectionné (onglet "Pellicule photo" pas nécessairement actif),
+    // convoque quand même tout le domaine du Grand Format 5×7" — pas juste sa propre fenêtre.
+    const visible = DIAGRAM_ENTRIES.filter(d => d.isRef || activeFamilies.has(d.fam) || activeSelectedIds.has(d.id)
+      || (d.id === 'photo-5x7' && activeSelectedIds.has('photo-6x6')));
     pool = visible.length ? visible : DIAGRAM_ENTRIES;
   }
   MAX_H_MM = Math.max(...pool.map(d => d.h));
@@ -509,7 +557,7 @@ function updateDomain(){
   TYPE_SCALE = MAX_W_MM / REF_DOMAIN_W_MM;
   chart.style.setProperty('--ds', TYPE_SCALE);
 }
-const REF_SHORT_LABEL = { 's16':'S16', 's35-4p':'S35', 'photo-135':'FF 35mm', 'imax':'IMAX 65mm', 'photo-5x7':'Grand Format 5×7" — photo' };
+const REF_SHORT_LABEL = { 's16':'S16', 's35-4p':'S35', 'photo-135':'FF 35mm', 'imax':'IMAX 65mm', 'photo-5x7':'Grand Format Photo 5×7"' };
 // Le petit code en coin (ex. "S16", "IMAX 65mm") des références standard reste TOUJOURS affiché,
 // quel que soit l'onglet actif : un repère d'échelle permanent. Le Grand Format 5×7" n'a plus ce
 // statut à part — comme n'importe quel format de sa famille (gphoto), il n'existe (cadre, code en
@@ -527,6 +575,40 @@ const chart = document.getElementById('chart');
 const inspector = document.getElementById('inspector');
 const legendTop = document.getElementById('legend-top');
 const legendBottom = document.getElementById('legend-bottom');
+
+// Mobile : la page d'accueil ne montre que la barre de recherche et l'onglet "Sélectionné(s)"
+// (cf. #legend-bottom masqué en CSS hors plein cadre) — cliquer dessus, ou sur le diagramme
+// lui-même, lance la vue plein cadre pivotée où tous les onglets de famille redeviennent
+// disponibles. mobileFullRequested reste vrai tant qu'aucune nouvelle demande n'est faite ;
+// mobileFullDismissed (remis à zéro à chaque nouvelle demande) permet à la croix de refermer
+// sans perdre la sélection en cours.
+const diagramCard = document.getElementById('diagram-card');
+const mobileFullQuery = window.matchMedia('(max-width: 700px)');
+let mobileFullDismissed = false;
+let mobileFullRequested = false;
+function updateMobileFullscreen(){
+  const shouldShow = mobileFullQuery.matches && mobileFullRequested && !mobileFullDismissed;
+  diagramCard.classList.toggle('mobile-full', shouldShow);
+}
+function requestMobileFullscreen(){
+  mobileFullDismissed = false;
+  mobileFullRequested = true;
+  updateMobileFullscreen();
+}
+document.getElementById('mobile-close').addEventListener('click', () => {
+  mobileFullDismissed = true;
+  updateMobileFullscreen();
+});
+// Cliquer n'importe où sur le diagramme (avant d'être en plein cadre) le lance aussi — pas
+// seulement les onglets.
+document.querySelector('.diagram-area').addEventListener('click', () => {
+  if(mobileFullQuery.matches && !diagramCard.classList.contains('mobile-full')) requestMobileFullscreen();
+});
+// Repasser au-dessus/en dessous du seuil (redimensionnement, rotation d'écran) doit ré-évaluer
+// l'état sans attendre un nouveau clic d'onglet — sinon le plein cadre peut rester coincé actif
+// une fois la fenêtre élargie.
+mobileFullQuery.addEventListener('change', updateMobileFullscreen);
+
 const selectedIds = new Set();
 // Formats sélectionnés actuellement "actifs" — comme un onglet de famille, chacun peut être
 // activé/désactivé indépendamment (clic sur son nom) sans le retirer de la sélection (la croix
@@ -687,19 +769,39 @@ function appendZoomContent(parent, d, W, H, opts){
 
   parent.appendChild(svgNS('rect', { x:offsetX, y:offsetY, width:drawnW, height:drawnH, fill:'none', stroke:d.color, 'stroke-width':2.4 }));
 
-  const textStyle = { 'paint-order':'stroke', 'stroke-linejoin':'round', 'font-family':"'JetBrains Mono', monospace", 'font-weight':700, fill:'#fff' };
-  const nameSize = Math.max(9, Math.round(H * 0.06));
-  const nameLabel = svgNS('text', { x:offsetX+8, y:offsetY+nameSize+5, class:'hz-name', ...textStyle, stroke:'rgba(0,0,0,0.75)', 'font-size':nameSize, 'stroke-width':nameSize*0.16 });
+  // Perforations, pour tout format pellicule (film comme photo) — mêmes données que le tableau du
+  // bas (d.perf, cf. buildStripIcon), toujours sur les bords gauche/droite de l'agrandissement.
+  if(d.fam !== 'gdigital' && d.perf > 0){
+    const holeSize = Math.max(3, drawnH * 0.02);
+    const holeInset = holeSize * 2.2;
+    const step = drawnH / d.perf;
+    for(let i=0;i<d.perf;i++){
+      const hy = offsetY + step*i + step/2 - holeSize/2;
+      parent.appendChild(svgNS('rect', { x:offsetX-holeInset, y:hy, width:holeSize, height:holeSize, rx:holeSize*0.25, fill:'#1a1712', stroke:'#4a453a', 'stroke-width':1 }));
+      parent.appendChild(svgNS('rect', { x:offsetX+drawnW+holeInset-holeSize, y:hy, width:holeSize, height:holeSize, rx:holeSize*0.25, fill:'#1a1712', stroke:'#4a453a', 'stroke-width':1 }));
+    }
+  }
+
+  // Texte fin et noir (liséré clair pour rester lisible sur la photo) — la taille du nom se
+  // réduit si besoin pour ne jamais déborder de l'agrandissement.
+  const textStyle = { 'paint-order':'stroke', 'stroke-linejoin':'round', 'font-family':"'JetBrains Mono', monospace", 'font-weight':500, fill:'#000' };
+  let nameSize = Math.max(9, Math.round(H * 0.06));
+  const nameAvail = drawnW - 16;
+  const estCharW = 0.6;
+  if(nameSize * estCharW * d.name.length > nameAvail){
+    nameSize = Math.max(7, Math.floor(nameAvail / (estCharW * d.name.length)));
+  }
+  const nameLabel = svgNS('text', { x:offsetX+8, y:offsetY+nameSize+5, class:'hz-name', ...textStyle, stroke:'rgba(255,255,255,0.85)', 'font-size':nameSize, 'stroke-width':nameSize*0.12 });
   nameLabel.textContent = d.name;
   parent.appendChild(nameLabel);
 
   // cotations mm, lisibles, au milieu de chaque côté.
   const dimSize = Math.max(8, Math.round(H * 0.058));
-  const wLabel = svgNS('text', { x:offsetX+drawnW/2, y:offsetY+drawnH-10, 'text-anchor':'middle', class:'hz-dim', ...textStyle, stroke:'rgba(0,0,0,0.8)', 'font-size':dimSize, 'stroke-width':dimSize*0.19 });
+  const wLabel = svgNS('text', { x:offsetX+drawnW/2, y:offsetY+drawnH-10, 'text-anchor':'middle', class:'hz-dim', ...textStyle, stroke:'rgba(255,255,255,0.85)', 'font-size':dimSize, 'stroke-width':dimSize*0.14 });
   wLabel.textContent = `${fmtMM(mmW)} mm`;
   parent.appendChild(wLabel);
 
-  const hLabel = svgNS('text', { 'text-anchor':'middle', class:'hz-dim', ...textStyle, stroke:'rgba(0,0,0,0.8)', 'font-size':dimSize, 'stroke-width':dimSize*0.19, transform:`translate(${offsetX+dimSize},${offsetY+drawnH/2}) rotate(-90)` });
+  const hLabel = svgNS('text', { 'text-anchor':'middle', class:'hz-dim', ...textStyle, stroke:'rgba(255,255,255,0.85)', 'font-size':dimSize, 'stroke-width':dimSize*0.14, transform:`translate(${offsetX+dimSize},${offsetY+drawnH/2}) rotate(-90)` });
   hLabel.textContent = `${fmtMM(mmH)} mm`;
   parent.appendChild(hLabel);
 
@@ -709,7 +811,7 @@ function appendZoomContent(parent, d, W, H, opts){
     const kLabel = resolutionK(d);
     if(kLabel){
       const kSize = Math.max(9, Math.round(H * 0.06));
-      const kText = svgNS('text', { x:offsetX+dimSize*2+10, y:offsetY+drawnH/2+kSize/3, class:'hz-name', ...textStyle, stroke:'rgba(0,0,0,0.75)', 'font-size':kSize, 'stroke-width':kSize*0.16 });
+      const kText = svgNS('text', { x:offsetX+dimSize*2+10, y:offsetY+drawnH/2+kSize/3, class:'hz-name', ...textStyle, stroke:'rgba(255,255,255,0.85)', 'font-size':kSize, 'stroke-width':kSize*0.12 });
       kText.textContent = kLabel;
       parent.appendChild(kText);
     }
@@ -776,17 +878,36 @@ function applyPersistentHighlight(){
 function render(){
   updateDomain();
   drawRuler();
-  chart.querySelectorAll('rect.frame, .hit-zone, .frame-image, .fname, .ref-tag, .ref-outline, .leader, .ghost-outline, g.label-group').forEach(el => el.remove());
+  chart.querySelectorAll('rect.frame, .hit-zone, .frame-image, .fname, .ref-tag, .ref-outline, .leader, .ghost-outline, .col-heading, g.label-group').forEach(el => el.remove());
 
-  // Bande d'étiquettes (noms de formats + lignes de rappel) à gauche du diagramme — calculée ici
-  // déjà car elle sert aussi à restreindre la zone de survol du Grand Format 5×7" ci-dessous.
-  // Mise à l'échelle par TYPE_SCALE : sans ça, la bande garderait sa largeur/hauteur "pleine
-  // taille" même en vue IMAX (domaine réduit), et les étiquettes descendraient bien trop bas.
-  const leftMargin = 20 * TYPE_SCALE;
+  // Bande d'étiquettes (noms de formats + lignes de rappel), DANS l'image, sous une marge libre
+  // qui laisse respirer le haut de la photo — calculée ici déjà car elle sert aussi à restreindre
+  // la zone de survol du Grand Format 5×7" ci-dessous. imgTop est le bord réel du cadre le plus
+  // grand actuellement sollicité (donc aussi de l'image, qui s'y cale toujours, cf. buildImageClip
+  // plus bas) — la marge est ajoutée SOUS ce bord, jamais au-dessus, pour que le texte reste dans
+  // la photo. Mise à l'échelle par TYPE_SCALE : sans ça, la bande garderait sa hauteur "pleine
+  // taille" même en vue IMAX (domaine réduit), et les étiquettes descendraient trop bas.
   const rightMargin = 20;
-  const labelZoneW = 260 * TYPE_SCALE;
-  const labelX = ORIGIN_X + leftMargin;
-  const bendX = ORIGIN_X + labelZoneW;
+  // Bornes horizontales réellement visibles de la photo (recadrée en IMAX hors vue Grand Format
+  // convoqué — même logique que le clip de l'image plus bas, calculée ici en amont pour que les
+  // étiquettes sachent où s'arrêter avant de déborder du bord de la photo).
+  const grandFormatConvokedGlobal = activeFamilies.has('gphoto') || activeSelectedIds.has('photo-5x7') || activeSelectedIds.has('photo-6x6') || DOMAIN_IS_CLEAN;
+  const imgClipW = (grandFormatConvokedGlobal ? DATA.find(e => e.id === 'photo-5x7').w : DATA.find(e => e.id === 'imax').w) * SCALE;
+  const imgClipLeft = CENTER_X - imgClipW/2;
+  const imgClipRight = CENTER_X + imgClipW/2;
+  const imgTop = ORIGIN_Y - MAX_H_MM * SCALE;
+  const topPad = imgTop + 34 * TYPE_SCALE;
+  const labelZoneH = 260 * TYPE_SCALE;
+  const bendY = topPad + labelZoneH;
+  // Trois blocs colonnes, dans l'ordre pellicule film / pellicule photo / digital — chaque famille
+  // n'appartient qu'à un seul bloc. Les lignes de rappel partent du bord du cadre correspondant à
+  // ce même côté : gauche pour le film, milieu pour la pellicule photo, droite pour le digital.
+  const COL_CATEGORIES = [
+    { label: 'Pellicule film', fams: ['g16', 'g35', 'gwide'], x: imgClipLeft + 12*TYPE_SCALE, anchor: 'start', side: 'left' },
+    { label: 'Pellicule photo', fams: ['gphoto'], x: CENTER_X, anchor: 'middle', side: 'center' },
+    { label: 'Digital', fams: ['gdigital'], x: imgClipRight - 12*TYPE_SCALE, anchor: 'end', side: 'right' },
+  ];
+  function categoryFor(d){ return COL_CATEGORIES.find(cat => cat.fams.includes(d.fam)); }
 
   const sorted = [...DATA].filter(d => !d.skipDiagram).sort((a,b) => (b.w*b.h) - (a.w*a.h));
   const refDraws = [];
@@ -808,17 +929,18 @@ function render(){
     if(d.isRef) rect.dataset.ref = '1';
     if(!famActive) rect.classList.add('dim');
     if(d.isRef && famActive) rect.classList.add('fam-active');
-    // La zone dédiée (hors bande d'étiquettes) ne concerne que le format actuellement visible dont
-    // le cadre déborde dans la bande (typiquement le plus grand format actif, qui touche
-    // l'origine) — jamais un format inactif/masqué : sinon son emprise (pointer-events:'all', bien
-    // plus large qu'un simple trait) recouvre et bloque d'autres éléments cliquables en dessous
-    // (ex. les cadres désqueezés), même sans jamais réagir elle-même (bug observé sur les onglets
-    // Pellicule photo / Digital et sur la sélection des formats anamorphiques).
-    if(isVisibleNow(d) && x < bendX){
+    // La zone dédiée (hors bande d'étiquettes, désormais en haut) ne concerne que le format
+    // actuellement visible dont le cadre déborde dans la bande (typiquement le plus grand format
+    // actif, qui touche l'origine) — jamais un format inactif/masqué : sinon son emprise
+    // (pointer-events:'all', bien plus large qu'un simple trait) recouvre et bloque d'autres
+    // éléments cliquables en dessous (ex. les cadres désqueezés), même sans jamais réagir
+    // elle-même (bug observé sur les onglets Pellicule photo / Digital et sur la sélection des
+    // formats anamorphiques).
+    if(isVisibleNow(d) && y < bendY){
       rect.style.pointerEvents = 'none';
-      const hitX = Math.max(x, bendX);
-      if(hitX < x + w){
-        const hit = svgNS('rect', { x:hitX, y:y, width:(x+w)-hitX, height:h, fill:'none', 'pointer-events':'all' });
+      const hitY = Math.max(y, bendY);
+      if(hitY < y + h){
+        const hit = svgNS('rect', { x:x, y:hitY, width:w, height:(y+h)-hitY, fill:'none', 'pointer-events':'all' });
         hit.classList.add('hit-zone');
         hit.dataset.id = d.id;
         hit.addEventListener('mouseenter', () => {
@@ -846,8 +968,8 @@ function render(){
     if(d.image){
       // Sans "Pellicule photo" (ni "all", ni épinglé actif au comparateur), le Grand Format 5×7"
       // n'est pas "convoqué" : l'image de fond reste cadrée sur l'IMAX 65mm plutôt que sur le
-      // Grand Format en entier.
-      const grandFormatConvoked = famActive || activeSelectedIds.has(d.id) || DOMAIN_IS_CLEAN;
+      // Grand Format en entier. Le Moyen Format Photo, seul épinglé actif, le convoque quand même.
+      const grandFormatConvoked = famActive || activeSelectedIds.has(d.id) || activeSelectedIds.has('photo-6x6') || DOMAIN_IS_CLEAN;
       const imgHref = encodeURI(d.image);
       let clipX = x, clipY = y, clipW = w, clipH = h;
       if(!grandFormatConvoked){
@@ -881,7 +1003,7 @@ function render(){
 
     // Le Grand Format 5×7" n'a plus de statut "toujours affiché" à part : son petit code en coin
     // ne sort qu'aux mêmes conditions que le reste de sa présence (famille active ou épinglé actif).
-    if(isRefTagged(d) || (d.id === 'photo-5x7' && (famActive || activeSelectedIds.has(d.id)))){
+    if(isRefTagged(d) || (d.id === 'photo-5x7' && (famActive || activeSelectedIds.has(d.id) || activeSelectedIds.has('photo-6x6')))){
       refDraws.push({ d, x, y, w, h });
     }
   });
@@ -896,15 +1018,19 @@ function render(){
     chart.appendChild(tag);
   });
 
+  // Cadre "fantôme" d'un format qui partage physiquement la fenêtre d'un autre (ex. le 3-perf
+  // anamorphique ×1,3 partage exactement la fenêtre du 3-perf sphérique) : même tracé, au trait
+  // exact du format partagé — pas de décalage ni de pointillé, seul le cadre désqueezé ci-dessous
+  // (sa version élargie, optiquement distincte) reste en pointillé.
   DATA.filter(d => d.skipDiagram && d.shareWith).forEach(d => {
     const shared = DATA.find(x => x.id === d.shareWith);
     if(!shared) return;
     const w = shared.w * SCALE, h = shared.h * SCALE;
-    const x = CENTER_X - w/2 + 3, y = CENTER_Y - h/2 + 3;
+    const x = CENTER_X - w/2, y = CENTER_Y - h/2;
     const dimmed = !activeFamilies.has(d.fam);
     const ghost = svgNS('rect', {
-      x:x, y:y, width:w-6, height:h-6, fill:'none',
-      stroke:d.color, 'stroke-width':1.6*TYPE_SCALE, 'stroke-dasharray':'1 3.5', 'stroke-linecap':'round'
+      x:x, y:y, width:w, height:h, fill:'none',
+      stroke:d.color, 'stroke-width':1.6*TYPE_SCALE
     });
     ghost.classList.add('ghost-outline');
     ghost.dataset.id = d.id;
@@ -933,8 +1059,8 @@ function render(){
       toggleSelect(d.id);
     });
     g.appendChild(rect);
-    // Étiquette dans la partie droite du diagramme (plutôt qu'à gauche, dans la bande de noms).
-    const tag = svgNS('text', { x:x+dw+8, y:y+12, 'text-anchor':'start', class:'fname' });
+    // Étiquette à gauche du cadre désqueezé.
+    const tag = svgNS('text', { x:x-8, y:y+12, 'text-anchor':'end', class:'fname' });
     tag.setAttribute('fill', d.color);
     tag.textContent = `desqueeze ×${d.squeeze} → ${d.ratioOut}`;
     g.appendChild(tag);
@@ -942,40 +1068,52 @@ function render(){
     chart.appendChild(g);
   });
 
+  // Le point d'ancrage (départ de la ligne de rappel sur le cadre) suit le côté de son bloc
+  // colonne : bord gauche pour la pellicule film, milieu pour la pellicule photo, bord droit pour
+  // le digital — jamais le coin haut-gauche générique d'avant.
   const items = LABELED.map(id => {
     const d = DATA.find(x => x.id === id);
     const refDims = d.shareWith ? DATA.find(x => x.id === d.shareWith) : d;
     const w = refDims.w * SCALE, h = refDims.h * SCALE;
-    return { d, ax: CENTER_X - w/2, ay: CENTER_Y - h/2 };
+    const cat = categoryFor(d);
+    const ax = cat.side === 'left' ? CENTER_X - w/2 : cat.side === 'right' ? CENTER_X + w/2 : CENTER_X;
+    return { d, ax, ay: CENTER_Y - h/2, cat };
   });
-  // Le Grand Format 5×7" est bien plus grand que tout le reste : son ancrage réel le placerait
-  // tout en haut, loin devant même "Moyen Format 6×6". On ne trie que sa POSITION dans la liste
-  // d'étiquettes juste au-dessus de "Moyen Format" (sortAy dédié) — son point d'ancrage réel
-  // (ax/ay, cercle + ligne de rappel) reste, lui, sur son vrai cadre dans le diagramme.
-  const moyenFormat = items.find(it => it.d.id === 'photo-6x6');
-  items.forEach(it => {
-    it.sortAy = (it.d.id === 'photo-5x7' && moyenFormat) ? moyenFormat.ay - 0.01 : it.ay;
-  });
-  items.sort((a,b) => a.sortAy - b.sortAy);
 
   const MIN_GAP = 14 * TYPE_SCALE;
-  let prevY = -Infinity;
-  items.forEach(it => {
-    let ly = Math.max(it.sortAy, 16 * TYPE_SCALE);
-    if(ly - prevY < MIN_GAP) ly = prevY + MIN_GAP;
-    it.ly = ly;
-    prevY = ly;
+  let maxLy = -Infinity;
+  // Un bloc colonne par catégorie (pellicule film / pellicule photo / digital), empilé
+  // indépendamment des deux autres — plus aucun tri global unique, chaque colonne a son propre
+  // empilement du haut vers le bas, dans le ciel de l'image.
+  COL_CATEGORIES.forEach(cat => {
+    const colItems = items.filter(it => it.cat === cat).sort((a,b) => a.ay - b.ay);
+    let prevY = -Infinity;
+    colItems.forEach(it => {
+      let ly = topPad + 22*TYPE_SCALE;
+      if(ly - prevY < MIN_GAP) ly = prevY + MIN_GAP;
+      it.ly = ly;
+      prevY = ly;
+      if(ly > maxLy) maxLy = ly;
+    });
   });
 
-  // la hauteur du canevas s'adapte au nombre de formats — plus aucune étiquette ne sort du cadre visible.
-  // Le diagramme (et l'image du 5×7) occupe toute la largeur ; les noms de formats et leurs lignes de
-  // rappel s'inscrivent par-dessus l'image, dans sa bande gauche (leftMargin/labelZoneW/bendX
-  // déclarés plus haut, déjà nécessaires pour la zone de survol du Grand Format 5×7").
-  const neededHeight = Math.max(ORIGIN_Y + 40, prevY + 40);
+  // la hauteur du canevas s'adapte au nombre de formats — plus aucune étiquette ne sort du cadre
+  // visible. Le diagramme (et l'image du 5×7) occupe toute la largeur ; les noms de formats et
+  // leurs lignes de rappel s'inscrivent par-dessus l'image, dans le ciel en haut (topPad/labelZoneH/
+  // bendY déclarés plus haut, déjà nécessaires pour la zone de survol du Grand Format 5×7").
+  const neededHeight = Math.max(ORIGIN_Y + 40, maxLy + 40);
   const neededWidth = GRID_END_X + rightMargin;
   chart.setAttribute('width', neededWidth);
   chart.setAttribute('height', neededHeight);
   chart.setAttribute('viewBox', `0 0 ${neededWidth} ${neededHeight}`);
+
+  // En-tête de chaque bloc colonne — toujours affiché (n'appartient à aucune famille unique pour
+  // le bloc "Pellicule film", qui en regroupe trois), au-dessus de sa propre liste de noms.
+  COL_CATEGORIES.forEach(cat => {
+    const heading = svgNS('text', { x:cat.x, y:topPad, 'text-anchor':cat.anchor, class:'col-heading' });
+    heading.textContent = cat.label;
+    chart.appendChild(heading);
+  });
 
   // Une référence ne se surligne par défaut que si SA propre famille est active (pas dès qu'une
   // autre l'est). Le Grand Format 5×7" suit désormais la même règle que sa famille (gphoto).
@@ -987,14 +1125,11 @@ function render(){
     g.dataset.id = d.id;
     if(d.isRef) g.dataset.ref = '1';
 
-    // si le cadre touche déjà la bande d'étiquettes (grands formats), pas de coude vers l'extérieur
-    const path = it.ax >= bendX
-      ? `M ${it.ax} ${it.ay} L ${bendX} ${it.ay} L ${bendX} ${it.ly} L ${labelX} ${it.ly}`
-      : `M ${it.ax} ${it.ay} L ${it.ax} ${it.ly} L ${labelX} ${it.ly}`;
+    const path = `M ${it.ax} ${it.ay} L ${it.ax} ${it.ly} L ${it.cat.x} ${it.ly}`;
     g.appendChild(svgNS('path', { d:path, fill:'none', stroke: d.color, 'stroke-width':1*TYPE_SCALE, 'stroke-opacity':0.6 }));
     g.appendChild(svgNS('circle', { cx:it.ax, cy:it.ay, r:2.4*TYPE_SCALE, fill: d.color }));
 
-    const label = svgNS('text', { x:labelX, y:it.ly+3, 'text-anchor':'start', class:'fname' });
+    const label = svgNS('text', { x:it.cat.x, y:it.ly+3, 'text-anchor':it.cat.anchor, class:'fname' });
     label.setAttribute('fill', d.color);
     label.textContent = d.name;
     g.appendChild(label);
@@ -1009,6 +1144,20 @@ function render(){
       toggleSelect(d.id);
     });
     chart.appendChild(g);
+
+    // Ne jamais déborder du bord visible de la photo — le texte grandit depuis son ancrage
+    // (à droite pour la colonne de gauche, à gauche pour celle de droite, des deux côtés pour
+    // celle du milieu) ; on réduit sa taille si besoin, mesurée une fois le nœud dans le DOM.
+    let avail;
+    if(it.cat.side === 'left') avail = imgClipRight - it.cat.x - 6;
+    else if(it.cat.side === 'right') avail = it.cat.x - imgClipLeft - 6;
+    else avail = 2*Math.min(it.cat.x - imgClipLeft, imgClipRight - it.cat.x) - 12;
+    const measured = label.getComputedTextLength();
+    if(measured > avail && avail > 10){
+      const currentSize = parseFloat(getComputedStyle(label).fontSize);
+      const factor = Math.max(0.55, avail / measured);
+      label.style.fontSize = (currentSize * factor) + 'px';
+    }
   });
 
   applyPersistentHighlight();
@@ -1086,17 +1235,43 @@ function buildRefDiagramInto(parent, d, W, H){
   const scale = Math.min((W - margin*2)/maxW, (H - margin*2)/maxH);
   const cx = W/2, cy = H/2;
 
-  parent.appendChild(svgNS('rect', { x:0, y:0, width:W, height:H, fill:'#ece6d8', rx:4 }));
+  // Même peinture en fond que le diagramme principal, à la MÊME échelle que les cadres de repère
+  // ci-dessous (le Grand Format 5×7" fait déjà partie de "refs", donc maxW/maxH couvrent toujours
+  // sa pleine taille — la photo se positionne ici à ce même cx/cy/scale, sans recadrage arbitraire,
+  // pour rester cohérente avec le diagramme principal où l'image se cale toujours sur ce format).
+  // Sans aplat derrière : juste la photo, sur le fond déjà sombre de la fiche récap.
+  const bgImg = chart.querySelector('image.frame-image');
+  const href = bgImg && (bgImg.getAttribute('href') || bgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href'));
+  const photo5x7 = DATA.find(r => r.id === 'photo-5x7');
+  if(href){
+    const clipId = 'refbg-clip-' + Math.random().toString(36).slice(2);
+    const defs = svgNS('defs', {});
+    const clip = svgNS('clipPath', { id: clipId });
+    clip.appendChild(svgNS('rect', { x:0, y:0, width:W, height:H, rx:4 }));
+    defs.appendChild(clip);
+    parent.appendChild(defs);
+    const imgW = photo5x7.w*scale, imgH = photo5x7.h*scale;
+    const img = svgNS('image', {
+      x:cx-imgW/2, y:cy-imgH/2, width:imgW, height:imgH,
+      'preserveAspectRatio':'xMidYMid slice', 'clip-path':`url(#${clipId})`
+    });
+    img.setAttribute('href', href);
+    img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', href);
+    parent.appendChild(img);
+  }
 
+  // Repères standard en blanc (lisibles sans aplat, sur la photo).
   refs.forEach(r => {
     const rw = r.w*scale, rh = r.h*scale;
-    parent.appendChild(svgNS('rect', { x:cx-rw/2, y:cy-rh/2, width:rw, height:rh, fill:'none', stroke:'#000', 'stroke-width':1.2, 'stroke-opacity':0.85 }));
-    const tag = svgNS('text', { x:cx+rw/2-4, y:cy-rh/2+12, 'text-anchor':'end', 'font-family':"'JetBrains Mono', monospace", 'font-size':9, 'font-weight':700, fill:'#000', 'fill-opacity':0.8 });
+    parent.appendChild(svgNS('rect', { x:cx-rw/2, y:cy-rh/2, width:rw, height:rh, fill:'none', stroke:'#fff', 'stroke-width':1.2, 'stroke-opacity':0.85 }));
+    const tag = svgNS('text', { x:cx+rw/2-4, y:cy-rh/2+12, 'text-anchor':'end', 'font-family':"'JetBrains Mono', monospace", 'font-size':9, 'font-weight':700, fill:'#fff', 'fill-opacity':0.85 });
     tag.textContent = REF_SHORT_LABEL[r.id] || r.name;
     parent.appendChild(tag);
   });
 
-  if(!d.isRef && d.id !== 'photo-5x7'){
+  // Le cadre du format demandé reste mis en évidence dans sa couleur, même quand il s'agit
+  // lui-même d'une des références standard (sinon il se fond dans les autres, tous en blanc).
+  {
     const dw = dBounds.w*scale, dh = dBounds.h*scale;
     parent.appendChild(svgNS('rect', { x:cx-dw/2, y:cy-dh/2, width:dw, height:dh, fill:'none', stroke:d.color, 'stroke-width':2.4 }));
     const dtag = svgNS('text', { x:cx-dw/2+6, y:cy-dh/2+16, 'font-family':"'JetBrains Mono', monospace", 'font-size':10.5, 'font-weight':700, fill:d.color });
@@ -1115,7 +1290,9 @@ function buildRecapSVG(d){
   if(d.resolution) stats.push(['Résolution', d.resolution]);
   const camLines = d.cameras ? wrapLines(d.cameras.join(' · '), RECAP_W - pad*2, 13) : [];
   const noteLines = wrapLines(d.note, RECAP_W - pad*2, 12.5);
-  const refDiagramH = 260;
+  // Même largeur ET même hauteur que l'agrandissement au-dessus (imgH) — moins de recadrage
+  // latéral vide autour de la photo, qui n'a plus qu'à passer sur fond noir (cf. plus bas).
+  const refDiagramH = imgH;
 
   // hauteur totale calculée à l'avance pour dimensionner le SVG exactement.
   let H = pad + 70 + imgH + 26;
@@ -1191,7 +1368,6 @@ function openRecap(d){
   const visual = document.getElementById('recap-visual');
   visual.innerHTML = '';
   visual.appendChild(buildRecapSVG(d));
-  document.getElementById('recap-header-title').textContent = d.name;
   const overlay = document.getElementById('recap-overlay');
   overlay.dataset.id = d.id;
   overlay.classList.add('open');
@@ -1305,6 +1481,9 @@ function buildLegendTop(){
   if(allActive) onlySelBtn.classList.add('active');
   onlySelBtn.title = 'Activer/désactiver tous les formats du comparateur dans le diagramme';
   onlySelBtn.addEventListener('click', () => {
+    // Sur mobile, cet onglet sert aussi de point d'entrée vers la vue plein cadre — même sans
+    // rien à activer/désactiver dans le comparateur (comparateur vide : la ligne suivante suffit).
+    requestMobileFullscreen();
     if(selectedIds.size === 0) return;
     if([...selectedIds].every(id => activeSelectedIds.has(id))) activeSelectedIds.clear();
     else selectedIds.forEach(id => activeSelectedIds.add(id));
@@ -1314,7 +1493,7 @@ function buildLegendTop(){
   });
 
   const label = document.createElement('span');
-  label.textContent = selectedIds.size === 0 ? 'Aucun sélectionné' : 'Sélectionné';
+  label.textContent = selectedIds.size === 0 ? 'Aucun sélectionné' : 'Sélectionné(s)';
   onlySelBtn.appendChild(label);
 
   if(selectedIds.size > 0){
@@ -1382,6 +1561,7 @@ function buildLegend(){
     else keys.forEach(k => activeFamilies.add(k));
     render();
     buildLegend();
+    requestMobileFullscreen();
   });
   legendBottom.appendChild(allBtn);
 
@@ -1395,6 +1575,7 @@ function buildLegend(){
       else { activeFamilies.add(key); btn.classList.add('active'); }
       render();
       allBtn.classList.toggle('active', keys.every(k => activeFamilies.has(k)));
+      requestMobileFullscreen();
     });
     legendBottom.appendChild(btn);
   });
@@ -1609,18 +1790,18 @@ function buildQuickTools(){
     results.style.display = 'block';
   }
 
-  // Survoler la barre déroule automatiquement la liste ; le clic ne sert qu'à écrire/filtrer.
-  // Fermeture différée (et annulée si la souris revient) pour tolérer le petit espace vertical
-  // entre le champ et le déroulé — sans ça, descendre la souris vers la liste la referme aussitôt.
-  const hint = document.querySelector('.compare-hint');
+  // Survoler le champ lui-même (son cadre, pas la zone alentour) déroule automatiquement la
+  // liste ; le clic ne sert qu'à écrire/filtrer. Fermeture différée (et annulée si la souris
+  // revient) pour tolérer le petit espace vertical entre le champ et le déroulé — sans ça,
+  // descendre la souris vers la liste la referme aussitôt.
   let closeTimer = null;
   function cancelClose(){ if(closeTimer){ clearTimeout(closeTimer); closeTimer = null; } }
   function scheduleClose(){ cancelClose(); closeTimer = setTimeout(() => { results.style.display = 'none'; }, 200); }
 
   input.addEventListener('input', runSearch);
   input.addEventListener('focus', runSearch);
-  hint.addEventListener('mouseenter', () => { cancelClose(); runSearch(); });
-  hint.addEventListener('mouseleave', scheduleClose);
+  input.addEventListener('mouseenter', () => { cancelClose(); runSearch(); });
+  input.addEventListener('mouseleave', scheduleClose);
   results.addEventListener('mouseenter', cancelClose);
   results.addEventListener('mouseleave', scheduleClose);
   document.addEventListener('click', (e) => {
