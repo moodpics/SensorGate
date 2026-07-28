@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sensor's framing</title>
+<title>The sensor does the framing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -83,34 +83,39 @@
 
   /* Mobile : dès qu'un onglet s'active sur un écran étroit, le diagramme passe en plein cadre,
      pivoté de 90° — il faut tourner le téléphone pour le voir à l'endroit, comme un mode paysage
-     forcé. Pivoté en même temps : les onglets (poussés à droite avant rotation, donc en bas une
-     fois le cadre tourné) restent accessibles sans revenir en mode droit. La croix ramène à la
-     page normale (le reste du contenu — tableaux, notes — n'est visible qu'en mode droit). */
+     forcé. Pivoté en même temps : les onglets (condensés contre l'image, poussés à droite avant
+     rotation donc en bas une fois le cadre tourné) restent accessibles sans revenir en mode droit.
+     La croix ramène à la page normale (le reste du contenu n'est visible qu'en mode droit). */
   .mobile-close{ display:none; }
   @media (max-width: 700px){
-    /* Page d'accueil mobile épurée : seule la recherche + "Sélectionné(s)" apparaissent — les
-       onglets de famille ne reviennent qu'une fois en plein cadre (cf. requestMobileFullscreen). */
+    /* Page d'accueil mobile épurée : seuls la phrase-recherche du hero et le diagramme (sans
+       onglets de famille) apparaissent — les onglets ne reviennent qu'une fois en plein cadre. */
     #legend-bottom{ display: none; }
     .diagram-card.mobile-full #legend-bottom{ display: flex; }
+    /* En plein cadre, le diagramme prend tout l'espace : les noms de formats vivent DANS l'image
+       (cf. render()). Les onglets flottent condensés contre l'image (pas de recherche, pas de
+       puces, déjà repris dans le diagramme) et la croix reste toujours visible pour en sortir. */
     .diagram-card.mobile-full{
       position: fixed; inset: 0; z-index: 500; margin: 0; border: none; border-radius: 0;
       width: 100vh; height: 100vw;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%) rotate(90deg);
       background: var(--bg-panel);
-      padding: 14px; box-sizing: border-box;
-      display: flex; flex-direction: row; align-items: stretch; gap: 12px;
+      padding: 6px; box-sizing: border-box;
+      display: flex; flex-direction: row; align-items: stretch; gap: 4px;
       overflow: hidden;
     }
     .diagram-card.mobile-full .inspector{ display: none; }
     .diagram-card.mobile-full .diagram-area{ order: 1; flex: 1 1 auto; min-width: 0; overflow: auto; }
     .diagram-card.mobile-full .diagram-area svg{ height: 100%; width: auto; max-width: none; }
     .diagram-card.mobile-full .toolbar{
-      order: 2; flex: 0 0 210px; margin: 0; padding: 0; border: none;
-      display: flex; flex-direction: column; overflow-y: auto;
+      order: 2; flex: 0 0 92px; margin: 0; padding: 0; border: none;
+      display: flex; flex-direction: column; justify-content: center; gap: 6px; overflow-y: auto;
     }
+    .diagram-card.mobile-full .toolbar-caption{ display: none; }
+    .diagram-card.mobile-full .legend{ flex-direction: column; align-items: stretch; }
     .diagram-card.mobile-full .mobile-close{
-      display: flex; position: absolute; top: 14px; right: 14px; z-index: 10;
+      display: flex; position: absolute; top: 14px; right: 14px; z-index: 20;
       width: 44px; height: 44px; border-radius: 50%;
       background: rgba(0,0,0,0.65); color: #fff; border: 2px solid rgba(255,255,255,0.55);
       font-size: 24px; line-height: 1; align-items: center; justify-content: center; cursor: pointer;
@@ -120,13 +125,17 @@
     h1, .hero p{ white-space: normal; overflow: visible; text-overflow: clip; }
   }
 
-  .toolbar{ display:flex; flex-direction:column; gap: 10px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
-  /* Une seule ligne d'onglets : la barre de recherche en tête, puis "Sélectionné(s)", "all" et
-     chaque famille à sa suite. Les puces sélectionnées s'affichent juste en dessous. */
-  .tabs-row{ display:flex; flex-wrap: wrap; align-items:center; gap: 10px; }
-  .selected-chips{ display:flex; flex-direction:column; gap: 5px; min-width: 160px; }
+  /* Toolbar du diagramme réduit à 2 lignes, collées contre le haut de l'image (petit espace) :
+     une légende centrée au-dessus des 3 onglets de famille (Digital / Still film / Motion film).
+     Les noms de formats eux-mêmes vivent directement dans le ciel de l'image (cf. render()). */
+  .toolbar{ display:flex; flex-direction:column; align-items:center; gap: 8px; margin-bottom: 10px; }
+  .toolbar-caption{
+    font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--paper-dim);
+  }
+  .selected-chips{ display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap: 8px 20px; margin-top: 12px; }
   .selected-chips:empty{ display:none; }
-  .legend{ display:flex; flex-wrap: wrap; align-items:center; gap: 8px; min-height: 36px; }
+  .legend{ display:flex; flex-wrap: wrap; justify-content:center; align-items:center; gap: 8px; min-height: 36px; }
   .legend button{
     font-family:'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.02em;
     background: var(--bg-raised); border: 1px solid var(--line); color: var(--paper-dim);
@@ -138,24 +147,25 @@
   .legend button:not(.active){ opacity: .5; }
   .legend button:hover{ opacity: 1; }
   .legend button.legend-tab-big{ font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-  .legend-tab-clear{ font-family:'JetBrains Mono', monospace; font-size: 13px; line-height: 1; margin-left: 2px; opacity: .7; }
-  .legend-tab-clear:hover{ opacity: 1; color: #e35a2e; }
 
-  /* Champ combiné : on y tape pour filtrer, ou on clique dedans (vide) pour dérouler tous les formats —
-     une seule et même liste #quick-search-results assure les deux usages. Prend ici la place de
-     l'ancien en-tête de section "01 — Diagramme à l'échelle". */
-  .combo-input{
-    font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--paper);
-    background: var(--bg-raised); border: 1px solid var(--line); padding: 10px 14px; border-radius: 3px;
-    width: 200px; max-width: 100%; transition: border-color .15s ease, box-shadow .15s ease;
+  /* Le champ "Capteur(s)" vit à même la 2e phrase du hero, remplaçant le mot "capteur" — son
+     placeholder indique aussi le compte de la sélection ("Capteur(s) sélectionné(s)"), et la
+     croix à côté vide tout le comparateur d'un coup (cf. updateCapteurLabel). */
+  .hero-line2{ white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+  .compare-hint{ position:relative; display:inline-block; }
+  .combo-input-inline{
+    font-family:'Space Grotesk', sans-serif; font-size: inherit; font-weight: 700; color: #f3aa3d;
+    background: transparent; border: none; border-bottom: 1px dashed rgba(243,170,61,0.6);
+    padding: 0 2px; width: 230px; max-width: 60vw; cursor: text;
   }
-  .combo-input:hover, .combo-input:focus{ border-color: #f3aa3d; box-shadow: 0 0 0 2px rgba(243,170,61,0.25); outline: none; }
-  .combo-input::placeholder{ color: var(--paper-dim); }
-
-  .compare-hint{
-    font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--paper-dim);
-    display:flex; flex-wrap:wrap; align-items:center; gap: 10px; min-width:0; max-width:100%;
+  .combo-input-inline:hover, .combo-input-inline:focus{ border-bottom-style: solid; outline: none; }
+  .combo-input-inline::placeholder{ color: #f3aa3d; opacity: .9; }
+  .capteur-clear{
+    font-family:'JetBrains Mono', monospace; font-size: 15px; line-height: 1; font-weight: 600;
+    background: none; border: none; color: var(--paper-dim); opacity: .6; cursor: pointer; padding: 0 2px;
+    display: none; vertical-align: baseline;
   }
+  .capteur-clear:hover{ opacity: 1; color: #e35a2e; }
 
   .ref-note{ font-family:'JetBrains Mono', monospace; font-size: 10.5px; color: #f4e4b8; margin-bottom: 14px; display:flex; align-items:center; gap: 8px; }
   .ref-note .sw{ width:10px; height:10px; border-radius:2px; background:#f4e4b8; flex-shrink:0; }
@@ -241,6 +251,13 @@
   /* Comparateur : une carte par format, côte à côte — même bloc image+détail que la vue
      "agrandissement" (mêmes classes .hz-*). Clic → fiche complète ; croix → retrait seul. */
   .compare-row{ display:flex; flex-wrap:wrap; gap: 16px; }
+  /* Mobile : cartes en ligne, lisibles de côté, on parcourt au doigt (scroll horizontal) plutôt
+     qu'un empilement vertical qui allongerait la page. Placé ici (après la règle de base, même
+     spécificité) pour être sûr de l'emporter dans la cascade. */
+  @media (max-width: 700px){
+    .compare-row{ flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
+    .compare-card{ flex: 0 0 200px; }
+  }
   .compare-card{
     width: 236px; max-width: 100%; background: var(--bg-panel); border: 1px solid var(--line);
     border-radius: 4px; overflow:hidden; cursor:pointer; transition: border-color .15s ease;
@@ -382,21 +399,20 @@
       <div class="cam-badge">digital <span class="amp">&amp;</span> film cameras</div>
     </div>
     <h1>Le <span class="hl">Capteur</span> donne le cadre</h1>
-    <p>Principe : la focale donne l'angle de champ et le capteur cadre dedans</p>
+    <p class="hero-line2">La Focale donne l'angle de champ et le(s)
+      <span class="compare-hint" style="position:relative">
+        <input type="text" id="quick-search-input" class="combo-input-inline" placeholder="Capteur(s)" autocomplete="off"><button class="capteur-clear" id="capteur-clear" title="Vider tout le comparateur">×</button>
+        <div id="quick-search-results" style="display:none;position:absolute;top:100%;left:0;margin-top:6px;width:320px;max-height:320px;overflow-y:auto;background:var(--bg-raised);border:1px solid var(--line);border-radius:4px;z-index:20;padding:6px;text-align:left"></div>
+      </span>
+      cadre(nt)</p>
+    <div class="selected-chips" id="selected-chips"></div>
   </header>
 
   <div class="diagram-card" id="diagram-card">
     <button class="mobile-close" id="mobile-close" title="Fermer la vue plein cadre">×</button>
     <div class="toolbar">
-      <div class="tabs-row" id="tabs-row">
-        <div class="compare-hint" style="position:relative">
-          <input type="text" id="quick-search-input" class="combo-input" placeholder="choisis un format" autocomplete="off">
-          <div id="quick-search-results" style="display:none;position:absolute;top:100%;left:0;margin-top:6px;width:320px;max-height:320px;overflow-y:auto;background:var(--bg-raised);border:1px solid var(--line);border-radius:4px;z-index:20;padding:6px"></div>
-        </div>
-        <div class="legend" id="legend-top"></div>
-        <div class="legend" id="legend-bottom"></div>
-      </div>
-      <div class="selected-chips" id="selected-chips"></div>
+      <div class="toolbar-caption">choisis ton capteur</div>
+      <div class="legend" id="legend-bottom"></div>
     </div>
     <div class="diagram-area">
       <svg id="chart" class="diagram-svg" width="900" height="440" viewBox="0 0 900 440"></svg>
@@ -478,6 +494,18 @@ const FAMILIES = {
   gphoto:   { label: 'Pellicule photo',   dot: '#c9a876', group: 'film' },
   gdigital: { label: 'Digital',            dot: '#4fa8d9', group: 'digital' },
 };
+
+// Présentation en 3 onglets seulement — la distinction pellicule 16mm/35mm/Large Format
+// disparaît côté interface (elle reste dans FAMILIES/d.fam pour les couleurs et le détail de
+// chaque format). "side" pilote à la fois la colonne où le nom s'affiche DANS l'image et le bord
+// du cadre où s'ancre sa ligne de rappel : droite pour le digital, milieu pour le still film,
+// gauche pour le motion film.
+const TAB_GROUPS = [
+  { key: 'digital', label: 'Digital',      fams: ['gdigital'],         side: 'right',  dot: '#4fa8d9' },
+  { key: 'still',   label: 'Still film',   fams: ['gphoto'],           side: 'middle', dot: '#c9a876' },
+  { key: 'motion',  label: 'Motion film',  fams: ['g16', 'g35', 'gwide'], side: 'left', dot: '#e35a2e' },
+];
+function categoryOf(d){ return TAB_GROUPS.find(g => g.fams.includes(d.fam)); }
 
 const REF_COLOR = '#f4e4b8';
 
@@ -573,7 +601,6 @@ DATA.forEach(d => {
 
 const chart = document.getElementById('chart');
 const inspector = document.getElementById('inspector');
-const legendTop = document.getElementById('legend-top');
 const legendBottom = document.getElementById('legend-bottom');
 
 // Mobile : la page d'accueil ne montre que la barre de recherche et l'onglet "Sélectionné(s)"
@@ -606,8 +633,12 @@ document.querySelector('.diagram-area').addEventListener('click', () => {
 });
 // Repasser au-dessus/en dessous du seuil (redimensionnement, rotation d'écran) doit ré-évaluer
 // l'état sans attendre un nouveau clic d'onglet — sinon le plein cadre peut rester coincé actif
-// une fois la fenêtre élargie.
-mobileFullQuery.addEventListener('change', updateMobileFullscreen);
+// une fois la fenêtre élargie. Le diagramme doit aussi se re-rendre : l'alignement des colonnes
+// de texte (toujours à droite en plein cadre mobile) dépend de ce même seuil.
+mobileFullQuery.addEventListener('change', () => {
+  updateMobileFullscreen();
+  render();
+});
 
 const selectedIds = new Set();
 // Formats sélectionnés actuellement "actifs" — comme un onglet de famille, chacun peut être
@@ -666,9 +697,9 @@ function isVisibleNow(d){
   return activeFamilies.has(d.fam) || activeSelectedIds.has(d.id);
 }
 
-// Survol d'un format dans le diagramme : atténue seulement les autres formats qui existent déjà
-// (catégorie active) — jamais ceux hors catégorie, qui restent masqués. Plus aucune fenêtre
-// flottante ne s'ouvre au survol (le détail complet passe par le comparateur et sa fiche récap).
+// Survol d'un format : atténue seulement les autres formats qui existent déjà (catégorie active)
+// — jamais ceux hors catégorie, qui restent masqués. Le nom et sa ligne de rappel (même groupe
+// SVG que le cadre) suivent automatiquement.
 function isolate(id){
   hoveredId = id;
   chart.querySelectorAll('[data-id]:not(.frame-image)').forEach(el => {
@@ -849,7 +880,7 @@ function toggleSelect(id){
   render();
   applyTableSelection();
   renderCompareSummary();
-  buildLegendTop();
+  updateCapteurLabel();
   renderSelectedChips();
 }
 
@@ -859,7 +890,6 @@ function toggleActiveSelected(id){
   if(activeSelectedIds.has(id)) activeSelectedIds.delete(id);
   else activeSelectedIds.add(id);
   render();
-  buildLegendTop();
   renderSelectedChips();
 }
 
@@ -880,17 +910,10 @@ function render(){
   drawRuler();
   chart.querySelectorAll('rect.frame, .hit-zone, .frame-image, .fname, .ref-tag, .ref-outline, .leader, .ghost-outline, .col-heading, g.label-group').forEach(el => el.remove());
 
-  // Bande d'étiquettes (noms de formats + lignes de rappel), DANS l'image, sous une marge libre
-  // qui laisse respirer le haut de la photo — calculée ici déjà car elle sert aussi à restreindre
-  // la zone de survol du Grand Format 5×7" ci-dessous. imgTop est le bord réel du cadre le plus
-  // grand actuellement sollicité (donc aussi de l'image, qui s'y cale toujours, cf. buildImageClip
-  // plus bas) — la marge est ajoutée SOUS ce bord, jamais au-dessus, pour que le texte reste dans
-  // la photo. Mise à l'échelle par TYPE_SCALE : sans ça, la bande garderait sa hauteur "pleine
-  // taille" même en vue IMAX (domaine réduit), et les étiquettes descendraient trop bas.
   const rightMargin = 20;
-  // Bornes horizontales réellement visibles de la photo (recadrée en IMAX hors vue Grand Format
-  // convoqué — même logique que le clip de l'image plus bas, calculée ici en amont pour que les
-  // étiquettes sachent où s'arrêter avant de déborder du bord de la photo).
+  // Les noms de formats vivent toujours DANS l'image (colonnes dans le ciel), desktop comme
+  // mobile — la bande qu'ils occupent en haut doit donc toujours rester protégée des cadres qui
+  // la traverseraient, pour ne jamais bloquer leur ligne de rappel.
   const grandFormatConvokedGlobal = activeFamilies.has('gphoto') || activeSelectedIds.has('photo-5x7') || activeSelectedIds.has('photo-6x6') || DOMAIN_IS_CLEAN;
   const imgClipW = (grandFormatConvokedGlobal ? DATA.find(e => e.id === 'photo-5x7').w : DATA.find(e => e.id === 'imax').w) * SCALE;
   const imgClipLeft = CENTER_X - imgClipW/2;
@@ -899,15 +922,21 @@ function render(){
   const topPad = imgTop + 34 * TYPE_SCALE;
   const labelZoneH = 260 * TYPE_SCALE;
   const bendY = topPad + labelZoneH;
-  // Trois blocs colonnes, dans l'ordre pellicule film / pellicule photo / digital — chaque famille
-  // n'appartient qu'à un seul bloc. Les lignes de rappel partent du bord du cadre correspondant à
-  // ce même côté : gauche pour le film, milieu pour la pellicule photo, droite pour le digital.
-  const COL_CATEGORIES = [
-    { label: 'Pellicule film', fams: ['g16', 'g35', 'gwide'], x: imgClipLeft + 12*TYPE_SCALE, anchor: 'start', side: 'left' },
-    { label: 'Pellicule photo', fams: ['gphoto'], x: CENTER_X, anchor: 'middle', side: 'center' },
-    { label: 'Digital', fams: ['gdigital'], x: imgClipRight - 12*TYPE_SCALE, anchor: 'end', side: 'right' },
-  ];
-  function categoryFor(d){ return COL_CATEGORIES.find(cat => cat.fams.includes(d.fam)); }
+  // Desktop : digital à droite, still film au centre, motion film à gauche (cf. TAB_GROUPS.side).
+  // Mobile plein cadre : les 3 colonnes restent toujours alignées à droite (chacune dans son
+  // propre tiers de largeur), plutôt que réparties gauche/centre/droite.
+  const isMobileFull = mobileFullQuery.matches;
+  const cols = TAB_GROUPS.map((g, i) => {
+    if(isMobileFull){
+      const segW = (imgClipRight - imgClipLeft) / TAB_GROUPS.length;
+      return { ...g, x: imgClipLeft + segW*(i+1) - 10*TYPE_SCALE, anchor: 'end' };
+    }
+    return {
+      ...g,
+      x: g.side === 'left' ? imgClipLeft + 12*TYPE_SCALE : g.side === 'right' ? imgClipRight - 12*TYPE_SCALE : CENTER_X,
+      anchor: g.side === 'left' ? 'start' : g.side === 'right' ? 'end' : 'middle',
+    };
+  });
 
   const sorted = [...DATA].filter(d => !d.skipDiagram).sort((a,b) => (b.w*b.h) - (a.w*a.h));
   const refDraws = [];
@@ -929,13 +958,8 @@ function render(){
     if(d.isRef) rect.dataset.ref = '1';
     if(!famActive) rect.classList.add('dim');
     if(d.isRef && famActive) rect.classList.add('fam-active');
-    // La zone dédiée (hors bande d'étiquettes, désormais en haut) ne concerne que le format
-    // actuellement visible dont le cadre déborde dans la bande (typiquement le plus grand format
-    // actif, qui touche l'origine) — jamais un format inactif/masqué : sinon son emprise
-    // (pointer-events:'all', bien plus large qu'un simple trait) recouvre et bloque d'autres
-    // éléments cliquables en dessous (ex. les cadres désqueezés), même sans jamais réagir
-    // elle-même (bug observé sur les onglets Pellicule photo / Digital et sur la sélection des
-    // formats anamorphiques).
+    // Exclure la bande de noms du haut (où vivent les textes de formats) : jamais bloquée par un
+    // cadre plus grand qui la traverserait, sinon sa ligne de rappel deviendrait incliquable.
     if(isVisibleNow(d) && y < bendY){
       rect.style.pointerEvents = 'none';
       const hitY = Math.max(y, bendY);
@@ -1008,14 +1032,13 @@ function render(){
     }
   });
 
-  // Liseré + chiffres des formats de référence : dessinés en dernier, donc toujours au-dessus
-  // de tous les autres cadres dans le DOM — jamais recouverts, quelle que soit la catégorie active.
+  // Liseré des formats de référence — plus de code en coin ni d'autre texte : le diagramme se
+  // libère entièrement des noms de format (ils vivent sous leur onglet, ou en plein cadre mobile
+  // dans le ciel de l'image). Dessiné en dernier, donc toujours au-dessus de tous les autres
+  // cadres dans le DOM — jamais recouvert, quelle que soit la catégorie active.
   refDraws.forEach(({ d, x, y, w, h }) => {
     const outline = svgNS('rect', { x:x, y:y, width:w, height:h, fill:'none', stroke:'#000', 'stroke-width':0.6*TYPE_SCALE, 'stroke-opacity':'0.8', 'pointer-events':'none', class:'ref-outline' });
     chart.appendChild(outline);
-    const tag = svgNS('text', { x:x+w-5, y:y+13*TYPE_SCALE, 'text-anchor':'end', fill:'#000', 'fill-opacity':'0.8', 'font-family':'JetBrains Mono, monospace', 'font-size':9.5*TYPE_SCALE, 'font-weight':'800', 'pointer-events':'none', class:'ref-tag' });
-    tag.textContent = REF_SHORT_LABEL[d.id] || d.name;
-    chart.appendChild(tag);
   });
 
   // Cadre "fantôme" d'un format qui partage physiquement la fenêtre d'un autre (ex. le 3-perf
@@ -1059,34 +1082,30 @@ function render(){
       toggleSelect(d.id);
     });
     g.appendChild(rect);
-    // Étiquette à gauche du cadre désqueezé.
-    const tag = svgNS('text', { x:x-8, y:y+12, 'text-anchor':'end', class:'fname' });
-    tag.setAttribute('fill', d.color);
-    tag.textContent = `desqueeze ×${d.squeeze} → ${d.ratioOut}`;
-    g.appendChild(tag);
     if(dimmed) g.classList.add('dim');
     chart.appendChild(g);
   });
 
-  // Le point d'ancrage (départ de la ligne de rappel sur le cadre) suit le côté de son bloc
-  // colonne : bord gauche pour la pellicule film, milieu pour la pellicule photo, bord droit pour
-  // le digital — jamais le coin haut-gauche générique d'avant.
+  // Point d'ancrage (départ des lignes de rappel) de chaque format labellisé — suit le côté de
+  // son onglet : bord droit pour le digital, milieu pour le still film, bord gauche pour le
+  // motion film. Rattaché à la version "cols" (avec x/anchor) de son groupe d'onglet.
   const items = LABELED.map(id => {
     const d = DATA.find(x => x.id === id);
     const refDims = d.shareWith ? DATA.find(x => x.id === d.shareWith) : d;
     const w = refDims.w * SCALE, h = refDims.h * SCALE;
-    const cat = categoryFor(d);
+    const groupKey = categoryOf(d).key;
+    const cat = cols.find(c => c.key === groupKey);
     const ax = cat.side === 'left' ? CENTER_X - w/2 : cat.side === 'right' ? CENTER_X + w/2 : CENTER_X;
-    return { d, ax, ay: CENTER_Y - h/2, cat };
+    const ay = CENTER_Y - h/2;
+    return { d, ax, ay, cat };
   });
 
   const MIN_GAP = 14 * TYPE_SCALE;
   let maxLy = -Infinity;
-  // Un bloc colonne par catégorie (pellicule film / pellicule photo / digital), empilé
-  // indépendamment des deux autres — plus aucun tri global unique, chaque colonne a son propre
-  // empilement du haut vers le bas, dans le ciel de l'image.
-  COL_CATEGORIES.forEach(cat => {
-    const colItems = items.filter(it => it.cat === cat).sort((a,b) => a.ay - b.ay);
+  // Un bloc colonne par catégorie, empilé indépendamment des deux autres — chaque colonne a son
+  // propre empilement du haut vers le bas, dans le ciel de l'image.
+  cols.forEach(col => {
+    const colItems = items.filter(it => it.cat === col).sort((a,b) => a.ay - b.ay);
     let prevY = -Infinity;
     colItems.forEach(it => {
       let ly = topPad + 22*TYPE_SCALE;
@@ -1097,26 +1116,18 @@ function render(){
     });
   });
 
-  // la hauteur du canevas s'adapte au nombre de formats — plus aucune étiquette ne sort du cadre
-  // visible. Le diagramme (et l'image du 5×7) occupe toute la largeur ; les noms de formats et
-  // leurs lignes de rappel s'inscrivent par-dessus l'image, dans le ciel en haut (topPad/labelZoneH/
-  // bendY déclarés plus haut, déjà nécessaires pour la zone de survol du Grand Format 5×7").
   const neededHeight = Math.max(ORIGIN_Y + 40, maxLy + 40);
   const neededWidth = GRID_END_X + rightMargin;
   chart.setAttribute('width', neededWidth);
   chart.setAttribute('height', neededHeight);
   chart.setAttribute('viewBox', `0 0 ${neededWidth} ${neededHeight}`);
 
-  // En-tête de chaque bloc colonne — toujours affiché (n'appartient à aucune famille unique pour
-  // le bloc "Pellicule film", qui en regroupe trois), au-dessus de sa propre liste de noms.
-  COL_CATEGORIES.forEach(cat => {
-    const heading = svgNS('text', { x:cat.x, y:topPad, 'text-anchor':cat.anchor, class:'col-heading' });
-    heading.textContent = cat.label;
+  cols.forEach(col => {
+    const heading = svgNS('text', { x:col.x, y:topPad, 'text-anchor':col.anchor, class:'col-heading' });
+    heading.textContent = col.label;
     chart.appendChild(heading);
   });
 
-  // Une référence ne se surligne par défaut que si SA propre famille est active (pas dès qu'une
-  // autre l'est). Le Grand Format 5×7" suit désormais la même règle que sa famille (gphoto).
   items.forEach(it => {
     const d = it.d;
     const famActive = activeFamilies.has(d.fam);
@@ -1125,14 +1136,34 @@ function render(){
     g.dataset.id = d.id;
     if(d.isRef) g.dataset.ref = '1';
 
-    const path = `M ${it.ax} ${it.ay} L ${it.ax} ${it.ly} L ${it.cat.x} ${it.ly}`;
-    g.appendChild(svgNS('path', { d:path, fill:'none', stroke: d.color, 'stroke-width':1*TYPE_SCALE, 'stroke-opacity':0.6 }));
     g.appendChild(svgNS('circle', { cx:it.ax, cy:it.ay, r:2.4*TYPE_SCALE, fill: d.color }));
 
     const label = svgNS('text', { x:it.cat.x, y:it.ly+3, 'text-anchor':it.cat.anchor, class:'fname' });
     label.setAttribute('fill', d.color);
     label.textContent = d.name;
     g.appendChild(label);
+    chart.appendChild(g); // attaché tôt : getComputedTextLength ci-dessous a besoin du DOM live.
+
+    let avail;
+    if(it.cat.side === 'left') avail = imgClipRight - it.cat.x - 6;
+    else if(it.cat.side === 'right') avail = it.cat.x - imgClipLeft - 6;
+    else avail = 2*Math.min(it.cat.x - imgClipLeft, imgClipRight - it.cat.x) - 12;
+    let measured = label.getComputedTextLength();
+    if(measured > avail && avail > 10){
+      const currentSize = parseFloat(getComputedStyle(label).fontSize);
+      const factor = Math.max(0.55, avail / measured);
+      label.style.fontSize = (currentSize * factor) + 'px';
+      measured = label.getComputedTextLength();
+    }
+
+    // La ligne de rappel part toujours du DÉBUT du texte (son bord gauche, quel que soit son
+    // sens de croissance depuis l'ancrage start/middle/end) — jamais de sa fin ni de son milieu.
+    const textStartX = it.cat.anchor === 'start' ? it.cat.x
+      : it.cat.anchor === 'end' ? it.cat.x - measured
+      : it.cat.x - measured/2;
+    const path = `M ${it.ax} ${it.ay} L ${it.ax} ${it.ly} L ${textStartX} ${it.ly}`;
+    const pathEl = svgNS('path', { d:path, fill:'none', stroke: d.color, 'stroke-width':1*TYPE_SCALE, 'stroke-opacity':0.6 });
+    g.insertBefore(pathEl, label);
 
     g.addEventListener('mouseenter', () => {
       if(!famActive && !activeSelectedIds.has(d.id)) return;
@@ -1143,21 +1174,6 @@ function render(){
       if(!famActive && !activeSelectedIds.has(d.id)) return;
       toggleSelect(d.id);
     });
-    chart.appendChild(g);
-
-    // Ne jamais déborder du bord visible de la photo — le texte grandit depuis son ancrage
-    // (à droite pour la colonne de gauche, à gauche pour celle de droite, des deux côtés pour
-    // celle du milieu) ; on réduit sa taille si besoin, mesurée une fois le nœud dans le DOM.
-    let avail;
-    if(it.cat.side === 'left') avail = imgClipRight - it.cat.x - 6;
-    else if(it.cat.side === 'right') avail = it.cat.x - imgClipLeft - 6;
-    else avail = 2*Math.min(it.cat.x - imgClipLeft, imgClipRight - it.cat.x) - 12;
-    const measured = label.getComputedTextLength();
-    if(measured > avail && avail > 10){
-      const currentSize = parseFloat(getComputedStyle(label).fontSize);
-      const factor = Math.max(0.55, avail / measured);
-      label.style.fontSize = (currentSize * factor) + 'px';
-    }
   });
 
   applyPersistentHighlight();
@@ -1473,40 +1489,16 @@ document.getElementById('recap-download').addEventListener('click', async (e) =>
 // Ligne 1 (haut) : un onglet permanent "Sélectionnés" — comme "all" pour les familles, il
 // active/désactive d'un coup tous les formats du comparateur. Les puces individuelles (colonne à
 // droite, cf. renderSelectedChips) fonctionnent pareil, une par une.
-function buildLegendTop(){
-  legendTop.innerHTML = '';
-  const onlySelBtn = document.createElement('button');
-  onlySelBtn.classList.add('legend-tab-big');
-  const allActive = selectedIds.size > 0 && [...selectedIds].every(id => activeSelectedIds.has(id));
-  if(allActive) onlySelBtn.classList.add('active');
-  onlySelBtn.title = 'Activer/désactiver tous les formats du comparateur dans le diagramme';
-  onlySelBtn.addEventListener('click', () => {
-    // Sur mobile, cet onglet sert aussi de point d'entrée vers la vue plein cadre — même sans
-    // rien à activer/désactiver dans le comparateur (comparateur vide : la ligne suivante suffit).
-    requestMobileFullscreen();
-    if(selectedIds.size === 0) return;
-    if([...selectedIds].every(id => activeSelectedIds.has(id))) activeSelectedIds.clear();
-    else selectedIds.forEach(id => activeSelectedIds.add(id));
-    applyPersistentHighlight();
-    buildLegendTop();
-    renderSelectedChips();
-  });
-
-  const label = document.createElement('span');
-  label.textContent = selectedIds.size === 0 ? 'Aucun sélectionné' : 'Sélectionné(s)';
-  onlySelBtn.appendChild(label);
-
-  if(selectedIds.size > 0){
-    const clearAll = document.createElement('span');
-    clearAll.className = 'legend-tab-clear';
-    clearAll.textContent = '×';
-    clearAll.title = 'Vider tout le comparateur';
-    clearAll.addEventListener('click', (e) => { e.stopPropagation(); clearAllSelected(); });
-    onlySelBtn.appendChild(clearAll);
-  }
-
-  legendTop.appendChild(onlySelBtn);
+// Le champ "Capteur(s)", à même la 2e phrase du hero, indique aussi le nombre de formats
+// sélectionnés — son placeholder change, et une croix apparaît à côté pour tout vider d'un coup
+// (remplace l'ancien onglet "Sélectionnés", retiré du diagramme).
+function updateCapteurLabel(){
+  const input = document.getElementById('quick-search-input');
+  const clearBtn = document.getElementById('capteur-clear');
+  input.placeholder = selectedIds.size === 0 ? 'Capteur(s)' : 'Capteur(s) sélectionné(s)';
+  clearBtn.style.display = selectedIds.size === 0 ? 'none' : 'inline';
 }
+document.getElementById('capteur-clear').addEventListener('click', () => clearAllSelected());
 
 // Colonne des formats sélectionnés, à droite des onglets, dans l'espace disponible du bandeau —
 // empilés, chacun avec sa propre variante de flottement (organique). Clic sur le nom : bascule
@@ -1546,41 +1538,27 @@ function renderSelectedChips(){
   });
 }
 
+// Trois onglets seulement (Digital / Still film / Motion film) — chacun bascule d'un coup toutes
+// les familles internes qu'il regroupe (une seule pour Digital/Still film, les trois du cinéma
+// pour Motion film). Les noms de formats vivent directement dans le ciel du diagramme (cf.
+// render()), plus de liste HTML séparée à reconstruire ici.
 function buildLegend(){
   legendBottom.innerHTML = '';
-  const keys = Object.keys(FAMILIES);
-
-  // "all" : onglet autonome, indépendant de "only selected" — s'active ou se désactive tout seul.
-  // Activé : tous les formats s'ouvrent (tous les onglets de famille). Désactivé : ils disparaissent tous.
-  const allBtn = document.createElement('button');
-  allBtn.classList.add('legend-tab-big');
-  if(keys.every(k => activeFamilies.has(k))) allBtn.classList.add('active');
-  allBtn.textContent = 'all';
-  allBtn.addEventListener('click', () => {
-    if(keys.every(k => activeFamilies.has(k))) activeFamilies.clear();
-    else keys.forEach(k => activeFamilies.add(k));
-    render();
-    buildLegend();
-    requestMobileFullscreen();
-  });
-  legendBottom.appendChild(allBtn);
-
-  keys.forEach(key => {
-    const fam = FAMILIES[key];
+  TAB_GROUPS.forEach(group => {
     const btn = document.createElement('button');
-    if(activeFamilies.has(key)) btn.classList.add('active');
-    btn.innerHTML = `<span class="dot" style="background:${fam.dot}"></span>${fam.label}`;
+    btn.classList.add('legend-tab-big');
+    if(group.fams.every(f => activeFamilies.has(f))) btn.classList.add('active');
+    btn.innerHTML = `<span class="dot" style="background:${group.dot}"></span>${group.label}`;
     btn.addEventListener('click', () => {
-      if(activeFamilies.has(key)){ activeFamilies.delete(key); btn.classList.remove('active'); }
-      else { activeFamilies.add(key); btn.classList.add('active'); }
+      const allOn = group.fams.every(f => activeFamilies.has(f));
+      if(allOn) group.fams.forEach(f => activeFamilies.delete(f));
+      else group.fams.forEach(f => activeFamilies.add(f));
       render();
-      allBtn.classList.toggle('active', keys.every(k => activeFamilies.has(k)));
+      buildLegend();
       requestMobileFullscreen();
     });
     legendBottom.appendChild(btn);
   });
-
-  buildLegendTop();
   renderSelectedChips();
 }
 
@@ -1591,7 +1569,7 @@ function clearAllSelected(){
   render();
   applyTableSelection();
   renderCompareSummary();
-  buildLegendTop();
+  updateCapteurLabel();
   renderSelectedChips();
 }
 
@@ -1814,6 +1792,7 @@ render();
 buildTables();
 renderCompareSummary();
 buildQuickTools();
+updateCapteurLabel();
 </script>
 
 </body>
