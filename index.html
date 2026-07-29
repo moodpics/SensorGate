@@ -83,59 +83,107 @@
 
   /* Mobile : dès qu'un onglet s'active sur un écran étroit, le diagramme passe en plein cadre,
      pivoté de 90° — il faut tourner le téléphone pour le voir à l'endroit, comme un mode paysage
-     forcé. Pivoté en même temps : les onglets (condensés contre l'image, poussés à droite avant
-     rotation donc en bas une fois le cadre tourné) restent accessibles sans revenir en mode droit.
-     La croix ramène à la page normale (le reste du contenu n'est visible qu'en mode droit). */
+     forcé. La carte ENTIÈRE (image comprise) tourne avec ce transform, mais les onglets et les
+     puces sélectionnées doivent, eux, rester lisibles à l'endroit (même présentation qu'au
+     clavier) : chacun vit dans une coque de positionnement (dimensions dans le repère LOCAL,
+     pré-rotation, de la carte — cf. #legend-all/#selected-chips) qui définit seulement où il
+     atterrit une fois tourné, et un contenu interne (.legend-inner/.selected-chips-inner) à la
+     taille "normale" DÉJÀ tournée de -90° pour annuler la rotation du parent — net : à l'endroit,
+     dans le bon sens de lecture. La croix ramène à la page normale (le reste du contenu n'est
+     visible qu'en mode droit). */
   .mobile-close{ display:none; }
+  .legend-inner, .selected-chips-inner{ display:contents; }
   @media (max-width: 700px){
     /* Page d'accueil mobile épurée : seuls la phrase-recherche du hero et le diagramme (sans
-       onglets de famille) apparaissent — les onglets ne reviennent qu'une fois en plein cadre. */
-    #legend-bottom{ display: none; }
-    .diagram-card.mobile-full #legend-bottom{ display: flex; }
-    /* En plein cadre, le diagramme prend tout l'espace : les noms de formats vivent DANS l'image
-       (cf. render()). Les onglets flottent condensés contre l'image (pas de recherche, pas de
-       puces, déjà repris dans le diagramme) et la croix reste toujours visible pour en sortir. */
+       onglets) apparaissent, centrés — les onglets ne reviennent qu'une fois en plein cadre. */
+    #legend-all{ display: none; }
+    .diagram-card.mobile-full #legend-all{ display: block; }
+    .diagram-area{ justify-content: center; }
+    .tabs-row-top{ justify-content: center; }
+    /* En plein cadre, le diagramme prend toute la carte ; onglets et puces sélectionnées flottent
+       PAR-DESSUS en overlay (pas de colonne séparée qui grignoterait l'image). */
     .diagram-card.mobile-full{
       position: fixed; inset: 0; z-index: 500; margin: 0; border: none; border-radius: 0;
       width: 100vh; height: 100vw;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%) rotate(90deg);
       background: var(--bg-panel);
-      padding: 6px; box-sizing: border-box;
-      display: flex; flex-direction: row; align-items: stretch; gap: 4px;
+      padding: 0; box-sizing: border-box;
       overflow: hidden;
     }
     .diagram-card.mobile-full .inspector{ display: none; }
-    .diagram-card.mobile-full .diagram-area{ order: 1; flex: 1 1 auto; min-width: 0; overflow: auto; }
-    .diagram-card.mobile-full .diagram-area svg{ height: 100%; width: auto; max-width: none; }
-    .diagram-card.mobile-full .toolbar{
-      order: 2; flex: 0 0 92px; margin: 0; padding: 0; border: none;
-      display: flex; flex-direction: column; justify-content: center; gap: 6px; overflow-y: auto;
+    .diagram-card.mobile-full .diagram-area{
+      width: 100%; height: 100%; margin: 0;
+      display: flex; align-items: flex-start; justify-content: center;
     }
-    .diagram-card.mobile-full .toolbar-caption{ display: none; }
-    .diagram-card.mobile-full .legend{ flex-direction: column; align-items: stretch; }
+    /* Image réduite en hauteur (pré-rotation, poussée vers le HAUT local) : dégage une marge noire
+       en BAS local, qui devient le côté GAUCHE une fois l'image tournée — cf. le sens de rotation
+       (local_y grand → final_X petit) — où flottent les puces sélectionnées, hors du diagramme. */
+    .diagram-card.mobile-full .diagram-area svg{ height: calc(100% - 92px); width: auto; max-width: none; }
+    /* Toolbar : simple calque transparent plein cadre par-dessus le diagramme — seuls ses propres
+       enfants redeviennent cliquables (pointer-events réactivé individuellement sur eux). */
+    .diagram-card.mobile-full .toolbar{ position: absolute; inset: 0; margin: 0; padding: 0; gap: 0; pointer-events: none; }
+    .diagram-card.mobile-full .tabs-row-top{ position: absolute; inset: 0; pointer-events: none; gap: 0; justify-content: flex-start; }
+    .diagram-card.mobile-full .compare-hint{ display: none; }
+    /* Puces sélectionnées — coque : bord bas (local) = côté GAUCHE une fois tourné ; largeur fixe
+       (local height) = largeur finale de la bande ; "right" réservé = épaisseur de la bande
+       d'onglets, pour ne pas empiéter sur son coin. */
+    .diagram-card.mobile-full #selected-chips{
+      display: block; position: absolute; left: 0; bottom: 0; right: 64px; height: 92px;
+      margin: 0; padding: 0; pointer-events: auto; overflow: visible;
+    }
+    /* Contenu réel des puces, à la taille "normale" (largeur = hauteur locale de la coque, cf.
+       100vh ci-dessus), centré sur la coque puis tourné de -90° pour annuler la rotation de la
+       carte — colonne verticale qui se lit à l'endroit, de haut en bas. */
+    .diagram-card.mobile-full .selected-chips-inner{
+      display: flex; position: absolute; top: 50%; left: 50%;
+      width: 92px; height: calc(100vh - 64px);
+      transform: translate(-50%, -50%) rotate(-90deg);
+      flex-direction: column; align-items: stretch; gap: 8px;
+      padding: 14px 10px; box-sizing: border-box; overflow-y: auto;
+    }
+    /* Onglets sélectionné/all/familles — coque : bord droit (local) = BAS une fois tourné ;
+       épaisseur fixe (local width) = épaisseur finale de la bande ; pleine hauteur locale = pleine
+       largeur finale (bande collée en bas, sur toute la largeur de l'image, par-dessus elle). */
+    .diagram-card.mobile-full #legend-all{
+      position: absolute; top: 0; right: 0; bottom: 0; width: 60px;
+      margin: 0; padding: 0; pointer-events: auto; overflow: visible;
+      background: none;
+    }
+    /* Contenu réel des onglets : même présentation qu'au clavier (mêmes classes .legend-tab-big /
+       .legend-select-wrap), en ligne horizontale — largeur = hauteur locale de la coque (100vw,
+       pleine largeur finale), hauteur = épaisseur locale (60px) — centré puis tourné de -90°. */
+    .diagram-card.mobile-full .legend-inner{
+      display: flex; position: absolute; top: 50%; left: 50%;
+      width: 100vw; height: 60px;
+      transform: translate(-50%, -50%) rotate(-90deg);
+      align-items: center; gap: 8px; flex-wrap: nowrap; overflow-x: auto;
+      padding: 0 16px; box-sizing: border-box;
+      background: linear-gradient(to top, rgba(10,8,5,0.82), rgba(10,8,5,0.35) 70%, transparent);
+    }
     .diagram-card.mobile-full .mobile-close{
       display: flex; position: absolute; top: 14px; right: 14px; z-index: 20;
       width: 44px; height: 44px; border-radius: 50%;
       background: rgba(0,0,0,0.65); color: #fff; border: 2px solid rgba(255,255,255,0.55);
       font-size: 24px; line-height: 1; align-items: center; justify-content: center; cursor: pointer;
+      pointer-events: auto;
     }
     /* Le titre et l'intro passent sur plusieurs lignes plutôt que d'être tronqués — sur un écran
        étroit, une seule ligne forcée les couperait bien avant la fin. */
     h1, .hero p{ white-space: normal; overflow: visible; text-overflow: clip; }
   }
 
-  /* Toolbar du diagramme réduit à 2 lignes, collées contre le haut de l'image (petit espace) :
-     une légende centrée au-dessus des 3 onglets de famille (Digital / Still film / Motion film).
-     Les noms de formats eux-mêmes vivent directement dans le ciel de l'image (cf. render()). */
-  .toolbar{ display:flex; flex-direction:column; align-items:center; gap: 8px; margin-bottom: 10px; }
-  .toolbar-caption{
-    font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--paper-dim);
-  }
-  .selected-chips{ display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap: 8px 20px; margin-top: 12px; }
+  /* Toolbar du diagramme en 2 lignes, collées contre le haut de l'image (petit espace) : une
+     ligne 1 avec, à gauche (alignée sur le bord gauche du diagramme), le champ "choisis un
+     capteur" suivi en ligne des puces sélectionnées (côte à côte, pour ne pas gagner en hauteur),
+     puis juste en dessous, toujours alignés à gauche, l'onglet de compte de sélection, "all" puis
+     les 3 onglets de famille (Digital / Still film / Motion film), tous dans la même ligne. Les
+     noms de formats eux-mêmes vivent directement dans le ciel de l'image (cf. render()). */
+  .toolbar{ display:flex; flex-direction:column; gap: 10px; margin-bottom: 10px; }
+  .tabs-row-top{ display:flex; align-items:center; gap: 16px; flex-wrap:wrap; }
+  .selected-chips{ display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap: 6px 16px; }
   .selected-chips:empty{ display:none; }
-  .legend{ display:flex; flex-wrap: wrap; justify-content:center; align-items:center; gap: 8px; min-height: 36px; }
+  .legend{ display:flex; flex-wrap: wrap; justify-content:flex-start; align-items:center; gap: 8px; min-height: 36px; }
   .legend button{
     font-family:'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.02em;
     background: var(--bg-raised); border: 1px solid var(--line); color: var(--paper-dim);
@@ -147,25 +195,37 @@
   .legend button:not(.active){ opacity: .5; }
   .legend button:hover{ opacity: 1; }
   .legend button.legend-tab-big{ font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  /* Onglet "sélectionné(s)" : même habillage que les onglets .legend button, mais c'est un div
+     (pas un bouton) car il porte une croix de fermeture — cliquer sur le libellé bascule
+     actif/inactif toute la sélection (ou active "all" si rien n'est encore sélectionné), la croix
+     vide le comparateur d'un coup. Toujours cliquable, même sans sélection. */
+  .legend-select-wrap{
+    font-family:'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; background: var(--bg-raised); border: 1px solid var(--line); color: var(--paper-dim);
+    padding: 7px 9px 7px 12px; border-radius: 3px; display:flex; align-items:center; gap: 8px; opacity: .5;
+    transition: border-color .15s ease, color .15s ease, background .15s ease, opacity .15s ease;
+  }
+  .legend-select-wrap.active{ color: var(--paper); border-color: #e35a2e; background: #2a2419; opacity: 1; }
+  .legend-select-wrap:hover{ opacity: 1; }
+  .legend-select-label{ cursor: pointer; }
+  .legend-select-close{
+    font-family:'JetBrains Mono', monospace; font-size: 14px; line-height: 1; font-weight: 600;
+    background: none; border: none; color: var(--paper-dim); opacity: .7; cursor: pointer; padding: 0 2px;
+  }
+  .legend-select-close:hover{ opacity: 1; color: #e35a2e; }
 
-  /* Le champ "Capteur(s)" vit à même la 2e phrase du hero, remplaçant le mot "capteur" — son
-     placeholder indique aussi le compte de la sélection ("Capteur(s) sélectionné(s)"), et la
-     croix à côté vide tout le comparateur d'un coup (cf. updateCapteurLabel). */
-  .hero-line2{ white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
-  .compare-hint{ position:relative; display:inline-block; }
-  .combo-input-inline{
-    font-family:'Space Grotesk', sans-serif; font-size: inherit; font-weight: 700; color: #f3aa3d;
-    background: transparent; border: none; border-bottom: 1px dashed rgba(243,170,61,0.6);
-    padding: 0 2px; width: 230px; max-width: 60vw; cursor: text;
+  /* Champ combiné (onglet "choisis un capteur") : on y tape pour filtrer, ou on clique dedans
+     (vide) pour dérouler tous les formats — une seule et même liste #quick-search-results assure
+     les deux usages. Plus de croix ici : vider la sélection se fait désormais depuis la croix de
+     l'onglet "sélectionné(s)" (cf. buildLegend). */
+  .compare-hint{ position:relative; display:flex; align-items:center; gap: 6px; }
+  .combo-input{
+    font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--paper);
+    background: var(--bg-raised); border: 1px solid var(--line); padding: 10px 14px; border-radius: 3px;
+    width: 200px; max-width: 100%; transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .combo-input-inline:hover, .combo-input-inline:focus{ border-bottom-style: solid; outline: none; }
-  .combo-input-inline::placeholder{ color: #f3aa3d; opacity: .9; }
-  .capteur-clear{
-    font-family:'JetBrains Mono', monospace; font-size: 15px; line-height: 1; font-weight: 600;
-    background: none; border: none; color: var(--paper-dim); opacity: .6; cursor: pointer; padding: 0 2px;
-    display: none; vertical-align: baseline;
-  }
-  .capteur-clear:hover{ opacity: 1; color: #e35a2e; }
+  .combo-input:hover, .combo-input:focus{ border-color: #f3aa3d; box-shadow: 0 0 0 2px rgba(243,170,61,0.25); outline: none; }
+  .combo-input::placeholder{ color: var(--paper-dim); }
 
   .ref-note{ font-family:'JetBrains Mono', monospace; font-size: 10.5px; color: #f4e4b8; margin-bottom: 14px; display:flex; align-items:center; gap: 8px; }
   .ref-note .sw{ width:10px; height:10px; border-radius:2px; background:#f4e4b8; flex-shrink:0; }
@@ -394,25 +454,20 @@
 <div class="wrap">
 
   <header class="hero">
-    <div class="hero-top">
-      <div class="eyebrow">fiche de référence — chef opérateur</div>
-      <div class="cam-badge">digital <span class="amp">&amp;</span> film cameras</div>
-    </div>
     <h1>Le <span class="hl">Capteur</span> donne le cadre</h1>
-    <p class="hero-line2">La Focale donne l'angle de champ et le(s)
-      <span class="compare-hint" style="position:relative">
-        <input type="text" id="quick-search-input" class="combo-input-inline" placeholder="Capteur(s)" autocomplete="off"><button class="capteur-clear" id="capteur-clear" title="Vider tout le comparateur">×</button>
-        <div id="quick-search-results" style="display:none;position:absolute;top:100%;left:0;margin-top:6px;width:320px;max-height:320px;overflow-y:auto;background:var(--bg-raised);border:1px solid var(--line);border-radius:4px;z-index:20;padding:6px;text-align:left"></div>
-      </span>
-      cadre(nt)</p>
-    <div class="selected-chips" id="selected-chips"></div>
   </header>
 
   <div class="diagram-card" id="diagram-card">
     <button class="mobile-close" id="mobile-close" title="Fermer la vue plein cadre">×</button>
     <div class="toolbar">
-      <div class="toolbar-caption">choisis ton capteur</div>
-      <div class="legend" id="legend-bottom"></div>
+      <div class="tabs-row-top" id="tabs-row-top">
+        <div class="compare-hint" style="position:relative">
+          <input type="text" id="quick-search-input" class="combo-input" placeholder="choisis un capteur" autocomplete="off">
+          <div id="quick-search-results" style="display:none;position:absolute;top:100%;left:0;margin-top:6px;width:320px;max-height:320px;overflow-y:auto;background:var(--bg-raised);border:1px solid var(--line);border-radius:4px;z-index:20;padding:6px"></div>
+        </div>
+        <div class="selected-chips" id="selected-chips"><div class="selected-chips-inner" id="selected-chips-inner"></div></div>
+      </div>
+      <div class="legend" id="legend-all"><div class="legend-inner" id="legend-all-inner"></div></div>
     </div>
     <div class="diagram-area">
       <svg id="chart" class="diagram-svg" width="900" height="440" viewBox="0 0 900 440"></svg>
@@ -501,9 +556,9 @@ const FAMILIES = {
 // du cadre où s'ancre sa ligne de rappel : droite pour le digital, milieu pour le still film,
 // gauche pour le motion film.
 const TAB_GROUPS = [
-  { key: 'digital', label: 'Digital',      fams: ['gdigital'],         side: 'right',  dot: '#4fa8d9' },
+  { key: 'digital', label: 'Digital',      fams: ['gdigital'],         side: 'left',   dot: '#4fa8d9' },
   { key: 'still',   label: 'Still film',   fams: ['gphoto'],           side: 'middle', dot: '#c9a876' },
-  { key: 'motion',  label: 'Motion film',  fams: ['g16', 'g35', 'gwide'], side: 'left', dot: '#e35a2e' },
+  { key: 'motion',  label: 'Motion film',  fams: ['g16', 'g35', 'gwide'], side: 'right', dot: '#e35a2e' },
 ];
 function categoryOf(d){ return TAB_GROUPS.find(g => g.fams.includes(d.fam)); }
 
@@ -601,12 +656,12 @@ DATA.forEach(d => {
 
 const chart = document.getElementById('chart');
 const inspector = document.getElementById('inspector');
-const legendBottom = document.getElementById('legend-bottom');
+const legendAll = document.getElementById('legend-all-inner');
 
-// Mobile : la page d'accueil ne montre que la barre de recherche et l'onglet "Sélectionné(s)"
-// (cf. #legend-bottom masqué en CSS hors plein cadre) — cliquer dessus, ou sur le diagramme
-// lui-même, lance la vue plein cadre pivotée où tous les onglets de famille redeviennent
-// disponibles. mobileFullRequested reste vrai tant qu'aucune nouvelle demande n'est faite ;
+// Mobile : la page d'accueil ne montre que la barre de recherche et le diagramme (cf. #legend-all
+// masqué en CSS hors plein cadre) — cliquer dessus, ou sur le diagramme lui-même, lance la vue
+// plein cadre pivotée où sélection/all/familles redeviennent disponibles, en overlay sur l'image.
+// mobileFullRequested reste vrai tant qu'aucune nouvelle demande n'est faite ;
 // mobileFullDismissed (remis à zéro à chaque nouvelle demande) permet à la croix de refermer
 // sans perdre la sélection en cours.
 const diagramCard = document.getElementById('diagram-card');
@@ -719,6 +774,41 @@ function unisolate(){
     el.classList.remove('iso-dim');
     el.classList.remove('iso-active');
   });
+}
+
+// Renvoie le groupe d'onglet (Digital / Still film / Motion film) si UN SEUL est actif seul —
+// ni "all", ni deux groupes à la fois, ni aucun — sinon null. Sert à activer le survol "partout"
+// ci-dessous (cf. skyHit dans render()) uniquement dans ce cas précis.
+function soloActiveGroup(){
+  for(const g of TAB_GROUPS){
+    if(activeFamilies.size === g.fams.length && g.fams.every(f => activeFamilies.has(f))) return g;
+  }
+  return null;
+}
+
+// Distance signée du point (px,py) au contour d'un cadre centré (bounds = x,y,w,h) : positive si
+// le point est à l'extérieur (distance à l'arête la plus proche), négative si à l'intérieur
+// (profondeur, distance à l'arête la plus proche en négatif). Permet, parmi plusieurs cadres
+// concentriques, de choisir celui dont le BORD est le plus proche du curseur, quelle que soit sa
+// taille — plus intuitif que d'exiger un survol pixel-parfait sur un trait fin.
+function edgeDistance(px, py, bounds){
+  const cx = bounds.x + bounds.w/2, cy = bounds.y + bounds.h/2;
+  const dx = Math.abs(px - cx) - bounds.w/2;
+  const dy = Math.abs(py - cy) - bounds.h/2;
+  return Math.max(dx, dy);
+}
+
+// Le format du groupe donné dont le cadre est le plus proche du point (px,py) — utilisé par le
+// survol "partout dans la zone hors texte" quand un seul onglet de famille est actif seul.
+function nearestFormatId(group, px, py){
+  let best = null, bestDist = Infinity;
+  LABELED.forEach(id => {
+    const d = DATA.find(x => x.id === id);
+    if(!d || categoryOf(d).key !== group.key) return;
+    const dist = Math.abs(edgeDistance(px, py, hoverFrameBounds(d)));
+    if(dist < bestDist){ bestDist = dist; best = d.id; }
+  });
+  return best;
 }
 
 function fmtMM(n){
@@ -881,7 +971,7 @@ function toggleSelect(id){
   applyTableSelection();
   renderCompareSummary();
   updateCapteurLabel();
-  renderSelectedChips();
+  buildLegend(); // rafraîchit aussi l'onglet "sélectionné" (compte + surbrillance) et les puces
 }
 
 // Toggle "comme un onglet" d'un format déjà sélectionné : ne le retire pas du comparateur (la
@@ -890,7 +980,7 @@ function toggleActiveSelected(id){
   if(activeSelectedIds.has(id)) activeSelectedIds.delete(id);
   else activeSelectedIds.add(id);
   render();
-  renderSelectedChips();
+  buildLegend(); // l'onglet "sélectionné" doit refléter si TOUTE la sélection est active ou non
 }
 
 function applyPersistentHighlight(){
@@ -908,7 +998,7 @@ function applyPersistentHighlight(){
 function render(){
   updateDomain();
   drawRuler();
-  chart.querySelectorAll('rect.frame, .hit-zone, .frame-image, .fname, .ref-tag, .ref-outline, .leader, .ghost-outline, .col-heading, g.label-group').forEach(el => el.remove());
+  chart.querySelectorAll('rect.frame, .hit-zone, .frame-image, .fname, .ref-tag, .ref-outline, .leader, .ghost-outline, .col-heading, .sky-hit-zone, g.label-group').forEach(el => el.remove());
 
   const rightMargin = 20;
   // Les noms de formats vivent toujours DANS l'image (colonnes dans le ciel), desktop comme
@@ -1127,6 +1217,30 @@ function render(){
     heading.textContent = col.label;
     chart.appendChild(heading);
   });
+
+  // Survol "partout" dans le ciel de l'image (où les cadres n'ont pas d'événements, réservés au
+  // texte) — uniquement quand un seul onglet de famille est actif seul : la souris y surligne à
+  // tout moment le format du groupe dont le cadre est le plus proche, sans avoir à viser un trait
+  // fin ni le nom lui-même. Ajouté APRÈS les rects/cadres (donc au-dessus) mais AVANT les
+  // label-groups ci-dessous (donc en-dessous d'eux) : les noms/lignes de rappel restent
+  // prioritaires et cliquables normalement par-dessus cette zone.
+  const soloGroup = soloActiveGroup();
+  const skyHit = svgNS('rect', { x:imgClipLeft, y:imgTop, width:Math.max(0, imgClipRight-imgClipLeft), height:Math.max(0, bendY-imgTop), fill:'transparent' });
+  skyHit.classList.add('sky-hit-zone');
+  if(soloGroup){
+    skyHit.style.pointerEvents = 'all';
+    skyHit.addEventListener('mousemove', (e) => {
+      const pt = chart.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      const loc = pt.matrixTransform(chart.getScreenCTM().inverse());
+      const id = nearestFormatId(soloGroup, loc.x, loc.y);
+      if(id) isolate(id);
+    });
+    skyHit.addEventListener('mouseleave', unisolate);
+  } else {
+    skyHit.style.pointerEvents = 'none';
+  }
+  chart.appendChild(skyHit);
 
   items.forEach(it => {
     const d = it.d;
@@ -1486,26 +1600,21 @@ document.getElementById('recap-download').addEventListener('click', async (e) =>
   }
 });
 
-// Ligne 1 (haut) : un onglet permanent "Sélectionnés" — comme "all" pour les familles, il
-// active/désactive d'un coup tous les formats du comparateur. Les puces individuelles (colonne à
-// droite, cf. renderSelectedChips) fonctionnent pareil, une par une.
-// Le champ "Capteur(s)", à même la 2e phrase du hero, indique aussi le nombre de formats
-// sélectionnés — son placeholder change, et une croix apparaît à côté pour tout vider d'un coup
-// (remplace l'ancien onglet "Sélectionnés", retiré du diagramme).
+// Le champ de recherche garde toujours le même texte, même une fois des capteurs sélectionnés —
+// le compte de sélection vit désormais dans son propre onglet (cf. buildLegend), croix de
+// fermeture comprise (plus de croix sur le champ lui-même).
 function updateCapteurLabel(){
   const input = document.getElementById('quick-search-input');
-  const clearBtn = document.getElementById('capteur-clear');
-  input.placeholder = selectedIds.size === 0 ? 'Capteur(s)' : 'Capteur(s) sélectionné(s)';
-  clearBtn.style.display = selectedIds.size === 0 ? 'none' : 'inline';
+  input.placeholder = 'choisis un capteur';
 }
-document.getElementById('capteur-clear').addEventListener('click', () => clearAllSelected());
 
-// Colonne des formats sélectionnés, à droite des onglets, dans l'espace disponible du bandeau —
-// empilés, chacun avec sa propre variante de flottement (organique). Clic sur le nom : bascule
-// actif/inactif comme un onglet, sans désélectionner. Seule la croix retire de la sélection.
+// Formats sélectionnés, à droite du champ de recherche (dans tabs-row-left), les uns à côté des
+// autres (pas en colonne, pour ne pas gagner en hauteur quand la liste s'allonge) — chacun avec
+// sa propre variante de flottement (organique). Clic sur le nom : bascule actif/inactif comme un
+// onglet, sans désélectionner. Seule la croix retire de la sélection.
 const CHIP_FLOAT_VARIANTS = 4;
 function renderSelectedChips(){
-  const container = document.getElementById('selected-chips');
+  const container = document.getElementById('selected-chips-inner');
   container.innerHTML = '';
   [...selectedIds].forEach((id, i) => {
     const d = DATA.find(x => x.id === id);
@@ -1538,12 +1647,73 @@ function renderSelectedChips(){
   });
 }
 
-// Trois onglets seulement (Digital / Still film / Motion film) — chacun bascule d'un coup toutes
-// les familles internes qu'il regroupe (une seule pour Digital/Still film, les trois du cinéma
-// pour Motion film). Les noms de formats vivent directement dans le ciel du diagramme (cf.
-// render()), plus de liste HTML séparée à reconstruire ici.
+// Trois onglets (Digital / Still film / Motion film) — chacun bascule d'un coup toutes les
+// familles internes qu'il regroupe (une seule pour Digital/Still film, les trois du cinéma pour
+// Motion film) — plus, sur la ligne du dessus, un onglet "all" qui les bascule tous ensemble
+// (actif seulement quand les 3 groupes le sont déjà). Les noms de formats vivent directement dans
+// le ciel du diagramme (cf. render()), plus de liste HTML séparée à reconstruire ici.
+// À gauche de "all" : un onglet de compte de sélection ("aucun sélectionné" / "N sélectionné(s)"),
+// qui bascule d'un coup l'actif/inactif de tous les formats épinglés — pendant du "all" mais pour
+// le comparateur plutôt que pour les familles. Désactivé (non cliquable) tant que rien n'est
+// sélectionné.
+const ALL_FAMS = TAB_GROUPS.flatMap(g => g.fams);
 function buildLegend(){
-  legendBottom.innerHTML = '';
+  legendAll.innerHTML = '';
+
+  // Onglet "sélectionné(s)" : toujours cliquable. Rien n'est sélectionné → le clic active "all"
+  // (comme si on cliquait directement dessus). Un format sélectionné est actif par défaut (cf.
+  // toggleSelect), donc l'onglet se surligne dès qu'on sélectionne un format ; cliquer dessus
+  // bascule l'actif/inactif de TOUTE la sélection d'un coup — redevient grisé et les formats
+  // disparaissent du diagramme (sans les retirer du comparateur, la croix seule le fait).
+  const selectWrap = document.createElement('div');
+  selectWrap.classList.add('legend-select-wrap');
+  const hasSelection = selectedIds.size > 0;
+  const allSelectedActive = hasSelection && [...selectedIds].every(id => activeSelectedIds.has(id));
+  if(allSelectedActive) selectWrap.classList.add('active');
+
+  const selectLabel = document.createElement('span');
+  selectLabel.className = 'legend-select-label';
+  selectLabel.textContent = hasSelection ? `${selectedIds.size} sélectionné(s)` : 'aucun sélectionné';
+  selectLabel.addEventListener('click', () => {
+    if(!hasSelection){
+      ALL_FAMS.forEach(f => activeFamilies.add(f));
+      render();
+      buildLegend();
+      requestMobileFullscreen();
+      return;
+    }
+    if(allSelectedActive) selectedIds.forEach(id => activeSelectedIds.delete(id));
+    else selectedIds.forEach(id => activeSelectedIds.add(id));
+    render();
+    buildLegend();
+  });
+  selectWrap.appendChild(selectLabel);
+
+  if(hasSelection){
+    const selectClose = document.createElement('button');
+    selectClose.className = 'legend-select-close';
+    selectClose.textContent = '×';
+    selectClose.title = 'Vider tout le comparateur';
+    selectClose.addEventListener('click', (e) => { e.stopPropagation(); clearAllSelected(); buildLegend(); });
+    selectWrap.appendChild(selectClose);
+  }
+  legendAll.appendChild(selectWrap);
+
+  const allBtn = document.createElement('button');
+  allBtn.classList.add('legend-tab-big');
+  if(ALL_FAMS.every(f => activeFamilies.has(f))) allBtn.classList.add('active');
+  allBtn.textContent = 'all';
+  allBtn.addEventListener('click', () => {
+    const allOn = ALL_FAMS.every(f => activeFamilies.has(f));
+    if(allOn) ALL_FAMS.forEach(f => activeFamilies.delete(f));
+    else ALL_FAMS.forEach(f => activeFamilies.add(f));
+    render();
+    buildLegend();
+    requestMobileFullscreen();
+  });
+  legendAll.appendChild(allBtn);
+
+  // Les 3 onglets de famille suivent directement "all", dans la même ligne/liste.
   TAB_GROUPS.forEach(group => {
     const btn = document.createElement('button');
     btn.classList.add('legend-tab-big');
@@ -1557,7 +1727,7 @@ function buildLegend(){
       buildLegend();
       requestMobileFullscreen();
     });
-    legendBottom.appendChild(btn);
+    legendAll.appendChild(btn);
   });
   renderSelectedChips();
 }
